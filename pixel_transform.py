@@ -16,6 +16,7 @@ filetypes = []
 def opencv_img(path):
     # read and convert image
     image = cv2.imread(path)
+    cv2.resize(image, (0,0), fx=0.5, fy=0.5) 
     return(image)
 
 # Convert it to ImageTK
@@ -38,26 +39,38 @@ def quit_img(event):
 
 # Select the image to load
 def select_image(event):
-    global original
     # Prompt the user
     path = filedialog.askopenfilename()
     # if there is a path and it is readable
     if len(path) > 0 and cv2.haveImageReader(path):
-        update_window(path)
+        update_original(path)
     else:
         print("no image")
-
-# Update the window    
-def update_window(path):
-    global original
+  
+# Negative image
+def neg_img(event):
+    global image
+    neg_img = 255-image
+    print("HI")
+    update_new(neg_img)
+    
+  
+def update_original(path):
+    global original, image
     image = opencv_img(path)
     disp_img = convert_img(image)
     
     original.configure(image=disp_img)
     original.image = disp_img
-    
+    return disp_img
+
+def update_new(img):    
+    global new
+    disp_img = convert_img(img)
     new.configure(image=disp_img)
     new.image = disp_img
+
+    
 
     
 
@@ -78,13 +91,23 @@ def main():
     frame = Frame()
     frame.pack()
     
+        # button for select image
+    btn_neg = Button(
+        master = frame,
+        text = "Negative",
+        underline = 0
+    )
+    btn_neg.grid(row = 0, column = 1)
+    btn_neg.bind('<ButtonRelease-1>', neg_img)
+    
+    
     # button for select image
     btn_select = Button(
         master = frame,
         text = "Select an Image",
         underline = 0
     )
-    btn_select.grid(row = 0, column = 1)
+    btn_select.grid(row = 1, column = 1)
     btn_select.bind('<ButtonRelease-1>', select_image)
     
 
