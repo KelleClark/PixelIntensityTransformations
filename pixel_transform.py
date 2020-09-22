@@ -60,9 +60,7 @@ def bitplane(color, bit):
 
     for i in range(image.shape[0]):
         for j in range(image.shape[1]):
-            if image[i][j][color] % 2**(bit+1) < 2**bit:
-                bitplane_img[i][j][color] = 0
-            else:
+            if image[i][j][color] % 2**(bit+1) >= 2**bit:
                 bitplane_img[i][j][color] = 255
 
     update_new(bitplane_img)
