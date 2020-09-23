@@ -1,9 +1,11 @@
-from tkinter import Tk, filedialog, Frame, Label, Button, simpledialog, filedialog
+from tkinter import Tk, filedialog, Frame, Label, Button
+from tkinter import simpledialog, filedialog
 from PIL import Image, ImageTk
 import cv2
 import numpy as np
 import sys
 import filetype
+import math
 
 
 # set up an a list for files
@@ -73,8 +75,8 @@ def prompt_bitplane(event):
     while(True):
         color = simpledialog.askstring("Input", "What color? (red, green, or blue)",
                                        parent=root)
-        if color.lower() in colors:
-            color_code = colors.index(color)
+        if color != None and color.lower() in colors:
+            color_code = colors.index(color.lower())
             break
 
     while (True):
@@ -86,6 +88,21 @@ def prompt_bitplane(event):
         
     bitplane(color_code, bit)
 
+
+def log_trans(event):
+    global image
+    
+    log_img = image.copy()
+    # Prevent overflow
+    log_img[log_img<255] += 1
+    
+    log = np.log(log_img)
+    
+    #Log transformation 
+    log_img = (255/np.max(log)) * log
+    log_img = np.array(log_img, dtype = np.uint8)
+    
+    update_new(log_img)
     
   
 def update_original(path):
@@ -144,6 +161,15 @@ def main():
     )
     btn_bit.grid(row = 0, column = 1)
     btn_bit.bind('<ButtonRelease-1>', prompt_bitplane)
+    
+    # Button for log transformation of image
+    btn_log = Button(
+        master = frame,
+        text = "Log",
+        underline = 0
+    )
+    btn_log.grid(row = 0, column = 2)
+    btn_log.bind('<ButtonRelease-1>', log_trans)
 
     
     # button for select image
@@ -163,6 +189,7 @@ def main():
     )
     btn_save.grid(row = 1, column = 0)
     btn_save.bind('<ButtonRelease-1>', save)
+    
     
 
     # Bind all the required keys to functions
