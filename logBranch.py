@@ -21,11 +21,11 @@ import sys
 
 ##-------Functions to open/read an image file and rendering in UI------------##
 
-# Read in image and conform to fit window
+# Read in image referred to by path and conform to fit screen
 def opencv_img(path):
     # read and convert image
     image = cv2.imread(path)
-    img = cv2.resize(image, (0,0), fx=0.25, fy=0.25) 
+    img = cv2.resize(image, (0,0), fx=0.5, fy=0.5) 
     return(img)
     
     
@@ -37,38 +37,9 @@ def convert_img(image):
     im = Image.fromarray(image)
     imgtk = ImageTk.PhotoImage(image=im)
     return(imgtk)
-
-# Wrapper to load the image for display
-#def load_img(count):
-#    return convert_img(opencv_img(count))
 ##---------------------------------------------------------------------------##
 
 ##--------Functions to display the metadata of images------------------------##
-# Gets filename and file location
-def extract_meta():
-    ind = images[count].rindex("/")
-    ans = ['','']
-    if ind != -1:
-        ans[0] = images[count][0:ind]
-        ans[1]= images[count][ind+1:]
-
-    return ans
-
-# Show metadata
-def meta(event):
-    impath = images[count]
-    info = os.lstat(impath)
-    showinfo("Image Metadata", info)
-
-# Update the information about the newest photo and the image itself
-#   on the window
-def update_window(imgtk, tex):
-        label['image'] = imgtk
-        label['text'] = tex[1]+"\nfrom "+tex[0]+"\n"+columns[count]+" x "+ \
-        rows[count]+" ("+pixels[count]+" pixels)\nImage type: "+ \
-        filetypes[count]+ "\nFile size: "+str(os.lstat(images[count]).st_size)\
-        +" bytes\n with intensity "+str(intensity[count])
-        label.photo = imgtk
 
 ##----------User Controls for the UI-----------------------------------------##
 
@@ -89,8 +60,9 @@ def quit_img(event):
     
 # Save the image to the main given path appending the name of any transformation
 def save_img(event):
+    global new
     name = filedialog.asksaveasfilename(confirmoverwrite=True)
-    cv2.imwrite(name, new_img)
+    cv2.imwrite(name, new)
     
 
 ##---------------------------------------------------------------------------##
@@ -100,17 +72,21 @@ def save_img(event):
 def update_original(path):
     global original, image
     image = opencv_img(path)
-    disp_img = convert_img(image)
-    
+    disp_img = convert_img(image) 
     original.configure(image=disp_img)
     original.image = disp_img
     return disp_img
+   
+
 # A newly transformed image, new, is formatted for display
-def update_new(img):    
-    global new
+def update_new(img):      
+    global new, new_img
+    new_img = img
     disp_img = convert_img(img)
     new.configure(image=disp_img)
-    new.image = disp_img  
+    new.image = disp_img
+    
+   
 ##---------------------------------------------------------------------------##
 ##---------Pixel Transformations---------------------------------------------##
 
@@ -160,15 +136,38 @@ def log_trans(event):
     
     log_img = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.uint8)
     
-    max_red = np.amax(image[:,:,0])
-    max_green = np.amax(image[:,:,1])
-    max_blue = np.amax(image[:,:,2])
+    cmax_red = np.amax(image[:,:,0])
+    cmax_green = np.amax(image[: ,:, 1])
+    cmax_blue = np.amax(image[: ,:,2])
     
-    for i in range(0, image.shape[0]):
-        for j in range(0, image.shape[1]):
-            log_img[i, j, 0] = 255/(math.log(2,1+max_red))*math.log(1+image[i,j,0])
-            log_img[i, j, 1] = 255/(math.log(2,1+max_green))*math.log(1+image[i,j,1])
-            log_img[i, j, 2] = 255/(math.log(2,1+max_blue))*math.log(1+image[i,j,2])
+    if cmax_red == 255:
+        cred = 255/math.log(255,10)
+    elif cmax_red < 10:
+        cred = 1
+    else:
+        cred = 255/math.log(cmax_red + 1,10)
+        
+    if cmax_green == 255:
+        cgreen = 255/math.log(.01,10)
+    elif cmax_green < 10:
+        cgreen = 1
+    else:
+        cgreen = 255/math.log(cmax_green + 1,10) 
+        
+    if cmax_blue == 255:
+        cblue = 255/math.log(.01,10)
+    elif cmax_blue < 10:
+        cblue = 1
+    else:
+        cblue = 255/math.log(cmax_blue + 1 ,10)
+    
+    for i in range(0, image.shape[0]-1):
+        for j in range(0, image.shape[1]-1):
+            log_img[i,j,0] = np.uint8(255 * math.log(1 + image[i,j,0],10)/math.log(1+ cmax_red,10))
+            log_img[i,j,1] = np.uint8(cgreen * math.log(1 + image[i,j,1],10))
+            log_img[i,j,2] = np.uint8(cblue * math.log(1 + image[i,j,2],10))
+
+   
     update_new(log_img)
         
     
