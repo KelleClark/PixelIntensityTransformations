@@ -19,6 +19,7 @@ def opencv_img(path):
     # read and convert image
     image = cv2.imread(path)
     image = cv2.resize(image, (0,0), fx=0.7, fy=0.7)
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     return(image)
 
 # Convert it to ImageTK
@@ -55,12 +56,12 @@ def neg_img(event):
     neg_img = 255-image
     update_new(neg_img)
 
-def bitplane(color, bit):
+def bitplane(bit):
     global image
 
     # Faster numpy trick
     bitplane_img = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.uint8)
-    bitplane_img[:,:,color][image[:,:,color]% 2**(bit+1) >= 2**bit] = np.uint8(255)
+    bitplane_img[image % 2**(bit+1) >= 2**bit] = np.uint8(255)
 
     """for i in range(image.shape[0]):
         for j in range(image.shape[1]):
@@ -71,14 +72,6 @@ def bitplane(color, bit):
 
 
 def prompt_bitplane(event):
-    colors = ["blue", "green", "red"]
-    while(True):
-        color = simpledialog.askstring("Input", "What color? (red, green, or blue)",
-                                       parent=root)
-        if color != None and color.lower() in colors:
-            color_code = colors.index(color.lower())
-            break
-
     while (True):
         bit = simpledialog.askinteger("Input", "What bit value? (0-7)",
                                          parent=root,
@@ -86,7 +79,7 @@ def prompt_bitplane(event):
         if bit != None:
             break
 
-    bitplane(color_code, bit)
+    bitplane(bit)
 
 
 def log_trans(event):
@@ -95,7 +88,6 @@ def log_trans(event):
     log_img = image.copy()
     # Prevent overflow
     log_img[log_img<255] += 1
-
     log = np.log(log_img)
 
     #Log transformation
@@ -104,7 +96,7 @@ def log_trans(event):
 
     update_new(log_img)
 
-# Show the image chosen by the user
+
 def update_original(path):
     global original, image
     image = opencv_img(path)
@@ -114,7 +106,6 @@ def update_original(path):
     original.image = disp_img
     return disp_img
 
-# Show the transformed image 
 def update_new(img):
     global new, new_img
     new_img = img
