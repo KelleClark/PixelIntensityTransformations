@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import sys
+from fractions import Fraction
 
 
 
@@ -58,9 +59,9 @@ def convert_img(image):
     imgtk = ImageTk.PhotoImage(image=im)
     return(imgtk)
 
-##---------------------------------------------------------------------------##
 
-##--------Functions to display the metadata of images------------------------##
+
+
 
 ##----------User Controls for the UI-----------------------------------------##
 
@@ -80,13 +81,11 @@ def quit_img(event):
     sys.exit(0)
     
 # Save the image to the main given path appending the name of any transformation
-def save_img(event):
-    global new
+def save(event):
     name = filedialog.asksaveasfilename(confirmoverwrite=True)
-    cv2.imwrite(name, new)
-    
+    cv2.imwrite(name, new_img)
 
-##---------------------------------------------------------------------------##
+
 
 ##---------GUI update image formating ---------------------------------------##
 # User given path to image, open and format image return disp_img        
@@ -107,26 +106,25 @@ def update_new(img):
     new.configure(image=disp_img)
     new.image = disp_img
     
-   
-##---------------------------------------------------------------------------##
+
 ##---------Pixel Transformations---------------------------------------------##
 
    
-# Negative image
+# Negative Transformation of image
 def neg_img(event):
     global image
     neg_img = 255-image
     print("HI")
     update_new(neg_img)
 
-# Collect user chosen parameters for bitplane transformation
+# Bitplane Prompt for user
 def prompt_bitplane(event):
     colors = ["blue", "green", "red"]
     while(True):
         color = simpledialog.askstring("Input", "What color? (red, green, or blue)",
                                        parent=root)
-        if color.lower() in colors:
-            color_code = colors.index(color)
+        if color != None and color.lower() in colors:
+            color_code = colors.index(color.lower())
             break
 
     while (True):
@@ -135,23 +133,102 @@ def prompt_bitplane(event):
                                          minvalue=0, maxvalue=7)
         if bit != None:
             break
-        
+
     bitplane(color_code, bit)
  
+# Bitplane Transformaton of image    
 def bitplane(color, bit):
     global image
-    
+
     # Faster numpy trick
     bitplane_img = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.uint8)
     bitplane_img[:,:,color][image[:,:,color]% 2**(bit+1) >= 2**bit] = np.uint8(255)
-    
+
     """for i in range(image.shape[0]):
         for j in range(image.shape[1]):
             if image[i][j][color] % 2**(bit+1) >= 2**bit:
                 bitplane_img[i][j][color] = 255"""
-                
+
     update_new(bitplane_img)
+
+# Prompt user for Arithmetic Operations
+def prompt_arithmetic(event):
+    operations = ["add", "subtract", "multiply", "divide"]
+    short = ["+", "-", "*", "/"]
     
+    options = {"+" : add_c, "add" : add_c,
+               "-" : minus_c, "subtract" : minus_c,
+               "*" : times_c, "multiply" : times_c,
+               "/" : divide_c, "divide": divide_c,}
+    
+    
+    while(True):
+        op = simpledialog.askstring("Input", "What operation? (+,-,*,/)",
+                                       parent=root)
+        if op != None and (op.lower() in operations or op in short):
+            break
+    if op.lower() in [ "*", "multiply"]:
+        while (True):
+            c = simpledialog.askfloat("Input", "What C?",
+                                             parent=root)
+            if c != None:
+                break
+   
+    else:
+        while (True):
+            c = simpledialog.askinteger("Input", "What C?",
+                                             parent=root)
+            if c != None:
+                break     
+
+    options[op.lower()](c)
+        
+    
+# Arithmetic Add c to each pixel in the image  
+def add_c(c):
+    global image
+    new_image = image.copy()
+    new_image[new_image + c >= new_image] += c
+    new_image[new_image + c < new_image] = 255
+    update_new(new_image)
+    
+# Arithmetic Subtract c from each pixel in the image    
+def minus_c(c):
+    global image
+    new_image = image.copy()
+    new_image[new_image - c <= new_image] -= c
+    new_image[new_image - c > new_image] = 0
+    update_new(new_image)
+    
+# Arithmetic Multilply each pixel in the image by c
+def times_c(c):
+    global image
+    new_image = image.copy()
+    # For integer operations
+    frac = Fraction(c).limit_denominator()
+    mult = frac.numerator
+    divide = frac.denominator
+    
+    #Scaling up
+    if mult >=1  and divide >= 1:
+        new_image[new_image * mult >= new_image] *= mult
+        new_image //= divide
+        new_image[new_image * mult  < new_image] = 255
+        
+    else:  #scale down
+        new_image //= divide
+        
+    update_new(new_image)
+ 
+# Arithmetic Divide each pixel by c       
+def divide_c(c):
+    global image
+    new_image = image.copy()
+    new_image //= c
+    update_new(new_image)
+    
+
+# Logarithmic Transformation of image    
 def log_trans(event):
     global image
     
@@ -171,7 +248,7 @@ def log_trans(event):
     log_img = np.array(log_img, dtype = np.uint8)
     update_new(log_img)
 
-# Collect user chosen parameters for bitplane transformation
+# Prompt user for Piecewise Linear transformation points
 def prompt_plinear(event):
     
     while(True):
@@ -208,7 +285,7 @@ def prompt_plinear(event):
         
     piecewise_linear(r1, s1, r2, s2) 
     
-    
+# Piecewise Linear Transformation of image   
 def piecewise_linear(r1, s1, r2, s2):
     global image
     
@@ -233,28 +310,7 @@ def piecewise_linear(r1, s1, r2, s2):
     plinear_img = np.array(plinear_img, dtype = np.uint8)
     update_new(plinear_img)
    
-    # for i in range(0, image.shape[0]-1):
-    #     for j in range(0, image.shape[1]-1):
-    #         if image[i,j,0] < r1:
-    #             plinear_img[i,j,0] = s1 / r1 * image[i,j,0]
-    #         elif image[i,j,1] >= r2:
-    #             plinear_img[i,j,0] = (255 - s2)/(255 - r2) * image[i,j,0]
-    #         else:
-    #             plinear_img[i,j,1] = (s2 - s1)/(r2 - r1) * image[i,j,0]
-    #         if image[i,j,1] < r1:
-    #             plinear_img[i,j,1] = s1 / r1 * image[i,j,1]
-    #         elif image[i,j,1] >= r2:
-    #             plinear_img[i,j,1] = (255 - s2)/(255 - r2) * image[i,j,1]
-    #         else:
-    #             plinear_img[i,j,1] = (s2 - s1)/(r2 - r1) * image[i,j,0]
-    #         if image[i,j,0] < r1:
-    #             plinear_img[i,j,2] = s1 / r1 * image[i, j, 2]
-    #         elif image[i,j,0] >= r2:
-    #             plinear_img = (255 - s2)/(255 - r2) * image[i, j, 2]
-    #         else:
-    #             plinear_img = (s2 - s1)/(r2 - r1) * image[i, j, 2]
-        
-    
+
 ##---------------------------------------------------------------------------##
 def main():
     global root, label, original, new

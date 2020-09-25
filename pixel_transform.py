@@ -183,6 +183,69 @@ def log_trans(event):
 
     update_new(log_img)
 
+# Prompt user for Piecewise Linear transformation points
+def prompt_plinear(event):
+    
+    while(True):
+        r1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter r1  from [0,254]", 
+                                    parent=root, 
+                                    minvalue=0, maxvalue=254)
+        if r1 != None:
+            break
+        
+    while(True):
+        s1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter s1 from [0,255]",
+                                    parent=root, minvalue=0, maxvalue=255)
+        if s1 != None:
+            break
+        
+    if (int(r1) < 254):
+        while(True):
+            r2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter r2  from (" + 
+                                        str(r1+1) + " , 255]", 
+                                        parent=root, 
+                                        minvalue=(r1 + 1), maxvalue=255)
+            if r2 != None:
+                break
+    else:
+        r2 = 255 
+        
+    while(True):
+        s2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter s2 from (" + 
+                                    str(s1) + " , 255]", 
+                                    parent=root, minvalue=0, maxvalue=255)
+        if s2 != None:
+            break   
+        
+        
+    piecewise_linear(r1, s1, r2, s2) 
+    
+# Piecewise Linear Transformation of image   
+def piecewise_linear(r1, s1, r2, s2):
+    global image
+    
+    # Faster numpy trick
+    plinear_img = image.copy()
+    
+    
+    # need two input points (r1, s1) and (r2, s2)
+    # where  0 < r1 < r2 <  255 and 
+    # and 0 <= s1 <= s2 <= 255 
+    # for pixel values in range [0, r1) we apply the linear
+    # transformation having slope (s1- 0)/(r1-0) and intercept 0
+    # for pixel values in range [r1, r2) we use the linear
+    # transformation with slope (s2 - s1)/(r2-r1) and intercept 0
+    # pixel values greater than or equal to r2 are acted on by
+    # the linear transformation (255 - s2)/(255 - r2)
+    
+    plinear_img[plinear_img < r1] *= s1//r1
+    plinear_img[plinear_img >= r2] *= (255 - s2)//(255 - r2)
+    plinear_img[(plinear_img >= r1) <r2 ] *=  (s2 - s1)//(r2 - r1)
+    
+    plinear_img = np.array(plinear_img, dtype = np.uint8)
+    update_new(plinear_img)
+   
+
 # Show the image chosen by the user
 def update_original(path):
     global original, image
@@ -279,6 +342,14 @@ def main():
     btn_save.grid(row = 1, column = 0)
     btn_save.bind('<ButtonRelease-1>', save)
 
+    # button for bitplane
+    btn_plinear = Button(
+        master = frame,
+        text = "Piecewise Linear",
+        underline = 0
+    )
+    btn_plinear.grid(row = 0, column = 3)
+    btn_plinear.bind('<ButtonRelease-1>', prompt_plinear)
 
 
     # Bind all the required keys to functions
