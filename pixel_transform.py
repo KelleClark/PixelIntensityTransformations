@@ -244,7 +244,36 @@ def piecewise_linear(r1, s1, r2, s2):
     
     plinear_img = np.array(plinear_img, dtype = np.uint8)
     update_new(plinear_img)
-   
+
+# Prompt User for threshold value so that any value below that value
+# is taken to 0 and any value at least the threshold is taken to max
+def prompt_threshold(event):
+    while(True):
+        thresh = simpledialog.askinteger("Input", "Enter an integer threshold value from [0,255]", 
+                                    parent=root, 
+                                    minvalue=0, maxvalue=255)
+        if thresh != None:
+            break
+    
+    while(True):
+        newmax = simpledialog.askinteger("Input", "Enter a max integer pixel value in [ " + str(thresh) + ", 255]",
+                                    parent=root, 
+                                    minvalue= thresh, maxvalue=255)
+        if thresh != None:
+            break
+                                         
+    threshold(thresh, newmax)
+    
+def threshold(tvalue, maxvalue):
+    global image
+    
+    thresh_img = image.copy()
+    
+    thresh_img[thresh_img < tvalue] = 0
+    thresh_img[thresh_img >= tvalue] = maxvalue
+    
+    thresh_img = np.array(thresh_img, dtype = np.uint8)
+    update_new(thresh_img)    
 
 # Show the image chosen by the user
 def update_original(path):
@@ -322,7 +351,15 @@ def main():
     )
     btn_arithmetic.grid(row = 0, column = 3)
     btn_arithmetic.bind('<ButtonRelease-1>', prompt_arithmetic)
-
+    
+    # Button for binarization/threshold
+    btn_threshold = Button(
+        master = frame,
+        text = "Binarization/Threshold",
+        underline = 0
+    )
+    btn_threshold.grid(row = 0, column = 4)
+    btn_threshold.bind('<ButtonRelease-1>', prompt_threshold)
 
     # button for select image
     btn_select = Button(
