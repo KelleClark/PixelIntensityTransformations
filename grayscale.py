@@ -6,6 +6,7 @@ import numpy as np
 import sys
 import filetype
 import math
+from fractions import Fraction
 
 
 # set up an a list for files
@@ -55,6 +56,87 @@ def neg_img(event):
     global image
     neg_img = 255-image
     update_new(neg_img)
+
+# Add c to each pixel in the image  
+def add_c(c):
+    global image
+    new_image = image.copy()
+    new_image[new_image + c >= new_image] += c
+    new_image[new_image + c < new_image] = 255
+    update_new(new_image)
+    
+# Subtract c from each pixel in the image    
+def minus_c(c):
+    global image
+    new_image = image.copy()
+    new_image[new_image - c <= new_image] -= c
+    new_image[new_image - c > new_image] = 0
+    update_new(new_image)
+    
+# Multilply each pixel in the image by c
+def times_c(c):
+    global image
+    new_image = image.copy()
+    # For integer operations
+    frac = Fraction(c).limit_denominator()
+    mult = frac.numerator
+    divide = frac.denominator
+    
+    #Scaling up
+    if mult >=1  and divide >= 1:
+        new_image[new_image * mult >= new_image] *= mult
+        new_image //= divide
+        new_image[new_image * mult  < new_image] = 255
+        
+    else:  #scale down
+        new_image //= divide
+        
+    update_new(new_image)
+ 
+# Divide each pixel by c       
+def divide_c(c):
+    global image
+    new_image = image.copy()
+    new_image //= c
+    update_new(new_image)
+    
+
+def prompt_arithmetic(event):
+    operations = ["add", "subtract", "multiply", "divide"]
+    short = ["+", "-", "*", "/"]
+    
+    options = {"+" : add_c, "add" : add_c,
+               "-" : minus_c, "subtract" : minus_c,
+               "*" : times_c, "multiply" : times_c,
+               "/" : divide_c, "divide": divide_c,}
+    
+    
+    while(True):
+        op = simpledialog.askstring("Input", "What operation? (+,-,*,/)",
+                                       parent=root)
+        if op != None and (op.lower() in operations or op in short):
+            break
+    if op.lower() in [ "*", "multiply"]:
+        while (True):
+            c = simpledialog.askfloat("Input", "What C?",
+                                             parent=root)
+            if c != None:
+                break
+   
+    else:
+        while (True):
+            c = simpledialog.askinteger("Input", "What C?",
+                                             parent=root)
+            if c != None:
+                break
+
+        
+
+    options[op.lower()](c)
+
+
+
+
 
 def bitplane(bit):
     global image
@@ -162,6 +244,14 @@ def main():
     )
     btn_log.grid(row = 0, column = 2)
     btn_log.bind('<ButtonRelease-1>', log_trans)
+    
+    btn_arithmetic = Button(
+        master = frame,
+        text = "Arithmetic",
+        underline = 0
+    )
+    btn_arithmetic.grid(row = 0, column = 3)
+    btn_arithmetic.bind('<ButtonRelease-1>', prompt_arithmetic)
 
 
     # button for select image
