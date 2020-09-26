@@ -413,7 +413,7 @@ def gamma_trans(gamma, multiplier):
   
 ##---------------------------------------------------------------------------##
 def main():
-    global root, img1, img2, img1_subset, img2_subset, new
+    global root, img1, img2, img1_subset, img2_subset, new, image
 
    
     root = Tk()
