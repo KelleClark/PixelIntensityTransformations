@@ -107,15 +107,13 @@ def update_img1(path):
     return disp_img
 
 def update_img2(path):
-    global img2, img1_subset, img2_subset
+    global img2
     image = opencv_img(path)
     disp_img = convert_img(image)
     img2.configure(image=disp_img)
     img2.image = disp_img
-
-    img1_subset = img1[0:int(min(img1.shape[0], img2.shape[0])), 0:int(min(img1.shape[1], img2.shape[1]))]
-    img2_subset = img2[0:int(min(img1.shape[0], img2.shape[0])), 0:int(min(img1.shape[1], img2.shape[1]))]
     return disp_img
+
    
 
 # A newly transformed image, new, is formatted for display
