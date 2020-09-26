@@ -81,6 +81,7 @@ def select_img2(event):
     # if there is a path and it is readable
     if len(path) > 0 and cv2.haveImageReader(path):
         update_img2(path)
+        get_subsets()
     else:
         print("no image")
 
@@ -107,13 +108,18 @@ def update_img1(path):
     return disp_img
 
 def update_img2(path):
-    global img2
-    image = opencv_img(path)
-    disp_img = convert_img(image)
+    global img2, image2
+    image2 = opencv_img(path)
+    disp_img = convert_img(image2)
     img2.configure(image=disp_img)
     img2.image = disp_img
     return disp_img
 
+def get_subsets():
+    global image, image2, img1_subset, img2_subset
+
+    img1_subset = image[0:int(min(image.shape[0], image2.shape[0])), 0:int(min(image.shape[1], image2.shape[1]))]
+    img2_subset = image2[0:int(min(image.shape[0], image2.shape[0])), 0:int(min(image.shape[1], image2.shape[1]))]
    
 
 # A newly transformed image, new, is formatted for display
@@ -407,11 +413,14 @@ def gamma_trans(gamma, multiplier):
     #end
     gamma_img = np.array(gamma_img, dtype = np.uint8)
     update_new(gamma_img)
-   
+
+def display_img1_subset(event):
+    global img1_subset
+    update_new(img1_subset)
   
 ##---------------------------------------------------------------------------##
 def main():
-    global root, img1, img2, img1_subset, img2_subset, new, image
+    global root, img1, img2, img1_subset, img2_subset, new, image, image2
 
    
     root = Tk()
@@ -523,6 +532,13 @@ def main():
     )
     btn_gamma.grid(row = 6, column = 0)
     btn_gamma.bind('<ButtonRelease-1>', prompt_gamma)
+
+    btn_display_img1_subset = Button(
+        master=frame,
+        text="Image 1 Subset"
+    )
+    btn_display_img1_subset.grid(row=7, column=0)
+    btn_display_img1_subset.bind('<ButtonRelease-1>', display_img1_subset)
     
  
     
