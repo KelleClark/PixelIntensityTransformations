@@ -18,6 +18,8 @@ import os
 import sys
 from fractions import Fraction
 
+# Flag for determining if there is a second image loaded
+second_img = False
 
 
 ##-------Functions to open/read an image file and rendering in UI------------##
@@ -76,12 +78,14 @@ def select_img1(event):
         print("no image")
 
 def select_img2(event):
+    global second_img
     # Prompt the user
     path = filedialog.askopenfilename()
     # if there is a path and it is readable
     if len(path) > 0 and cv2.haveImageReader(path):
         update_img2(path)
         get_subsets()
+        second_img = True
     else:
         print("no image")
 
@@ -414,6 +418,66 @@ def gamma_trans(gamma, multiplier):
     gamma_img = np.array(gamma_img, dtype = np.uint8)
     update_new(gamma_img)
 
+
+# Union of the current two images   
+def union():
+    global image, image2
+    new = np.maximum(image, image2)
+    update_new(new)
+
+# Intersection of the current two images  
+def intersection():
+    global image, image2
+    new = np.minimum(image, image2)
+    update_new(new)
+
+# Set difference of the current two images
+def difference():
+    global image, image2
+    new = image.copy()
+    new[new == image2] = 0 
+    update_new(new)
+    
+# The complement of the current image using C
+def complement(c):
+    global image    
+    new = image.copy()
+
+    while(True):
+        c= simpledialog.askinteger("Input", "What constant C?]", 
+                                    parent=root, 
+                                    minvalue=0)
+        if c != None:
+            break
+    
+    new[new - c <= new] -= c
+    new[new - c > new] = 0
+    update_new(new)
+
+#Prompt the user for what binary set operation they want.    
+def prompt_set(event):
+    #Requires two images
+    if not second_img:
+        print("no")
+        return
+    
+    #Allowed operations
+    operations = ["union", "intersection", "differnece", "u", "i", "d"]
+    options = {"union" : union, "u" : union,
+               "intersection" : intersection, "i" : intersection,
+               "difference" : difference, "d" : difference}
+    
+    while(True):
+        op = simpledialog.askstring("Input", "Union, Intersection, or Difference?",
+                                       parent=root)
+        # Make sure they answer
+        if op != None and (op.lower() in operations):
+            break
+    # Call the user chosen operation
+    options[op.lower()]()
+    
+
+
 def display_img1_subset(event):
     global img1_subset
     update_new(img1_subset)
@@ -540,6 +604,20 @@ def main():
     btn_display_img1_subset.grid(row=7, column=0)
     btn_display_img1_subset.bind('<ButtonRelease-1>', display_img1_subset)
     
+ 
+    btn_bin = Button(
+        master=frame,
+        text="Binary Set"
+    )
+    btn_bin.grid(row=8, column=0)
+    btn_bin.bind('<ButtonRelease-1>', prompt_set)
+    
+    btn_comp = Button(
+        master=frame,
+        text="Complement"
+    )
+    btn_comp.grid(row=8, column=1)
+    btn_comp.bind('<ButtonRelease-1>', complement)
  
     
     # Bind all the required keys to functions
