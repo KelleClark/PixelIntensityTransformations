@@ -121,9 +121,10 @@ def update_img2(path):
 
 def get_subsets():
     global image, image2, img1_subset, img2_subset
-
-    img1_subset = image[0:int(min(image.shape[0], image2.shape[0])), 0:int(min(image.shape[1], image2.shape[1]))]
-    img2_subset = image2[0:int(min(image.shape[0], image2.shape[0])), 0:int(min(image.shape[1], image2.shape[1]))]
+    img1_subset = image[0:int(min(image.shape[0], image2.shape[0])),
+                        0:int(min(image.shape[1], image2.shape[1]))]
+    img2_subset = image2[0:int(min(image.shape[0], image2.shape[0])),
+                         0:int(min(image.shape[1], image2.shape[1]))]
    
 
 # A newly transformed image, new, is formatted for display
@@ -421,21 +422,21 @@ def gamma_trans(gamma, multiplier):
 
 # Union of the current two images   
 def union():
-    global image, image2
-    new = np.maximum(image, image2)
+    global img1_subset, img2_subset
+    new = np.maximum(img1_subset, img2_subset)
     update_new(new)
 
 # Intersection of the current two images  
 def intersection():
     global image, image2
-    new = np.minimum(image, image2)
+    new = np.minimum(img1_subset, img2_subset)
     update_new(new)
 
 # Set difference of the current two images
 def difference():
-    global image, image2
-    new = image.copy()
-    new[new == image2] = 0 
+    global img1_subset, img2_subset
+    new = img1_subset.copy()
+    new[new == img2_subset] = 0 
     update_new(new)
     
 # The complement of the current image using C
