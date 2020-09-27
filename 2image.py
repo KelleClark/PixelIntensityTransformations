@@ -123,6 +123,7 @@ def get_subsets():
     global image, image2, img1_subset, img2_subset
     img1_subset = image[0:int(min(image.shape[0], image2.shape[0])),
                         0:int(min(image.shape[1], image2.shape[1]))]
+   
     img2_subset = image2[0:int(min(image.shape[0], image2.shape[0])),
                          0:int(min(image.shape[1], image2.shape[1]))]
    
@@ -390,7 +391,7 @@ def prompt_gamma(event):
     
     
     
-ddef gamma_trans(gamma, multiplier):
+def gamma_trans(gamma, multiplier):
     global image
     gamma_img = np.array(image, dtype=np.float32)
     
@@ -461,11 +462,6 @@ def prompt_set(event):
     # Call the user chosen operation
     options[op.lower()]()
     
-
-
-def display_img1_subset(event):
-    global img1_subset
-    update_new(img1_subset)
   
 ##---------------------------------------------------------------------------##
 def main():
@@ -581,13 +577,6 @@ def main():
     )
     btn_gamma.grid(row = 6, column = 0)
     btn_gamma.bind('<ButtonRelease-1>', prompt_gamma)
-
-    btn_display_img1_subset = Button(
-        master=frame,
-        text="Image 1 Subset"
-    )
-    btn_display_img1_subset.grid(row=7, column=0)
-    btn_display_img1_subset.bind('<ButtonRelease-1>', display_img1_subset)
     
  
     btn_bin = Button(
