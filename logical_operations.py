@@ -18,7 +18,8 @@ import os
 import sys
 from fractions import Fraction
 
-# Flag for determining if there is a second image loaded
+# Flag for determining if images are loaded
+img = False
 second_img = False
 
 
@@ -69,13 +70,15 @@ def convert_img(image):
 
 # Select the image to load
 def select_img1(event):
+    global img
     # Prompt the user
     path = filedialog.askopenfilename()
     # if there is a path and it is readable
     if len(path) > 0 and cv2.haveImageReader(path):
         update_img1(path)
+        img = False
     else:
-        print("no image")
+        showinfo("Error", "No Image")
 
 def select_img2(event):
     global second_img
@@ -87,7 +90,7 @@ def select_img2(event):
         get_subsets()
         second_img = True
     else:
-        print("no image")
+        showinfo("Error", "No Image")
 
 #Exit the program
 def quit_img(event):
@@ -136,6 +139,11 @@ def update_new(img):
     new.configure(image=disp_img)
     new.image = disp_img
     
+def is_image():
+    global img
+    if not img:
+        showinfo("Error", "No Images")
+        return
 
 ##---------Pixel Transformations---------------------------------------------##
 
@@ -143,11 +151,15 @@ def update_new(img):
 # Negative Transformation of image
 def neg_img(event):
     global image
+    if not is_image():
+        return
     neg_img = 255-image
     update_new(neg_img)
 
 # Bitplane Prompt for user
 def prompt_bitplane(event):
+    if not is_image():
+        return
     colors = ["blue", "green", "red"]
     while(True):
         color = simpledialog.askstring("Input", "What color? (red, green, or blue)",
@@ -168,7 +180,8 @@ def prompt_bitplane(event):
 # Bitplane Transformaton of image    
 def bitplane(color, bit):
     global image
-
+    if not is_image():
+        return
     # Faster numpy trick
     bitplane_img = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.uint8)
     bitplane_img[:,:,color][image[:,:,color]% 2**(bit+1) >= 2**bit] = np.uint8(255)
@@ -182,6 +195,8 @@ def bitplane(color, bit):
 
 # Prompt user for Arithmetic Operations
 def prompt_arithmetic(event):
+    if not is_image():
+        return
     operations = ["add", "subtract", "multiply", "divide"]
     short = ["+", "-", "*", "/"]
     
@@ -260,6 +275,8 @@ def divide_c(c):
 # Logarithmic Transformation of image    
 def log_trans(event):
     global image
+    if not is_image():
+        return
     
     cpy_img = image.copy()
     
@@ -279,6 +296,9 @@ def log_trans(event):
 
 # Prompt user for Piecewise Linear transformation points
 def prompt_plinear(event):
+    
+    if not is_image():
+        return
     
     while(True):
         r1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter r1  from [0,254]", 
@@ -317,7 +337,8 @@ def prompt_plinear(event):
 # Piecewise Linear Transformation of image   
 def piecewise_linear(r1, s1, r2, s2):
     global image
-    
+    if not is_image():
+        return
     # Faster numpy trick
     plinear_img = image.copy()
     
@@ -343,6 +364,10 @@ def piecewise_linear(r1, s1, r2, s2):
 # is taken to 0 and any value at least the threshold is taken to max
 def prompt_threshold(event):
     global image
+
+    if not is_image():
+        return
+
     while(True):
         thresh = simpledialog.askinteger("Input", "Enter an integer threshold value from [0,255]", 
                                     parent=root, 
@@ -360,6 +385,7 @@ def prompt_threshold(event):
     threshold(thresh, newmax, image)
     
 def threshold(tvalue, maxvalue, image):
+
     thresh_img = image.copy()
     
     thresh_img[thresh_img < tvalue] = 0
@@ -370,6 +396,10 @@ def threshold(tvalue, maxvalue, image):
     return thresh_img
 
 def prompt_gamma(event):
+
+    if not is_image():
+        return
+    
     while (True):
             gvalue = simpledialog.askfloat("Input", "Enter in a value for gamma at least 0",
                                              parent=root,
@@ -391,7 +421,6 @@ def prompt_gamma(event):
     
     
 def gamma_trans(gamma, multiplier):
-    global image
     gamma_img = np.array(image, dtype=np.float32)
     
     #start
@@ -426,6 +455,8 @@ def difference():
 # The complement of the current image using C
 def complement(c):
     global image    
+    if not is_image():
+        return
     new = image.copy()
 
     while(True):
@@ -443,7 +474,7 @@ def complement(c):
 def prompt_set(event):
     #Requires two images
     if not second_img:
-        print("no")
+        showinfo("Error", "Need Two Images")
         return
     
     #Allowed operations
@@ -462,24 +493,44 @@ def prompt_set(event):
     options[op.lower()]()
 
 def bitwise_and(event):
+    #Requires two images
+    if not second_img:
+        showinfo("Error", "Need Two Images")
+        return
+    
     thresh_img1 = threshold(127, 255, img1_subset)
     thresh_img2 = threshold(127, 255, img2_subset)
     and_img = cv2.bitwise_and(thresh_img1, thresh_img2)
     update_new(and_img)
 
 def bitwise_or(event):
+     #Requires two images
+    if not second_img:
+        showinfo("Error", "Need Two Images")
+        return
+    
     thresh_img1 = threshold(127, 255, img1_subset)
     thresh_img2 = threshold(127, 255, img2_subset)
     or_img = cv2.bitwise_or(thresh_img1, thresh_img2)
     update_new(or_img)
 
 def bitwise_xor(event):
+     #Requires two images
+    if not second_img:
+        showinfo("Error", "Need Two Images")
+        return
+    
     thresh_img1 = threshold(127, 255, img1_subset)
     thresh_img2 = threshold(127, 255, img2_subset)
     xor_img = cv2.bitwise_xor(thresh_img1, thresh_img2)
     update_new(xor_img)
 
 def bitwise_not(event):
+     #Requires two images
+    if not second_img:
+        showinfo("Error", "No Image")
+        return
+    
     thresh_img = threshold(127, 255, image)
     not_img = cv2.bitwise_not(thresh_img)
     update_new(not_img)
