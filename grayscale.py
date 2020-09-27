@@ -18,7 +18,8 @@ import os
 import sys
 from fractions import Fraction
 
-# Flag for determining if there is a second image loaded
+# Flag for determining if images are loaded
+img = False
 second_img = False
 
 
@@ -67,13 +68,16 @@ def convert_img(image):
 
 # Select the image to load
 def select_img1(event):
+    global img
     # Prompt the user
     path = filedialog.askopenfilename()
     # if there is a path and it is readable
     if len(path) > 0 and cv2.haveImageReader(path):
         update_img1(path)
+        img = True
     else:
         print("no image")
+        
 
 def select_img2(event):
     global second_img
@@ -97,6 +101,14 @@ def save_img(event):
     name = filedialog.asksaveasfilename(confirmoverwrite=True)
     cv2.imwrite(name, new_img)
 
+# Check if a image is loaded
+def is_image():
+    global img
+    if not img:
+        showinfo("Error", "No Images")
+        return False
+    return True
+        
 
 
 ##---------GUI update image formating ---------------------------------------##
@@ -139,11 +151,18 @@ def update_new(img):
 # Negative Transformation of image
 def neg_img(event):
     global image
+    
+    if not is_image():
+        return
     neg_img = 255-image
     update_new(neg_img)
 
 # Bitplane Prompt for user
 def prompt_bitplane(event):
+    
+    if not is_image():
+        return
+
     colors = ["blue", "green", "red"]
     while(True):
         color = simpledialog.askstring("Input", "What color? (red, green, or blue)",
@@ -164,6 +183,9 @@ def prompt_bitplane(event):
 # Bitplane Transformaton of image    
 def bitplane(color, bit):
     global image
+    
+    if not is_image():
+        return
 
     # Faster numpy trick
     bitplane_img = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.uint8)
@@ -178,6 +200,10 @@ def bitplane(color, bit):
 
 # Prompt user for Arithmetic Operations
 def prompt_arithmetic(event):
+    
+    if not is_image():
+        return
+
     operations = ["add", "subtract", "multiply", "divide"]
     short = ["+", "-", "*", "/"]
     
@@ -256,7 +282,10 @@ def divide_c(c):
 # Logarithmic Transformation of image    
 def log_trans(event):
     global image
-    
+
+    if not is_image():
+        return
+
     cpy_img = image.copy()
     
     # Add 1 to all pixel values except those at 255 to prevent overflow
@@ -275,6 +304,9 @@ def log_trans(event):
 
 # Prompt user for Piecewise Linear transformation points
 def prompt_plinear(event):
+    
+    if not is_image():
+        return
     
     while(True):
         r1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter r1  from [0,254]", 
@@ -314,6 +346,8 @@ def prompt_plinear(event):
 def piecewise_linear(r1, s1, r2, s2):
     global image
     
+    
+    
     # Faster numpy trick
     plinear_img = image.copy()
     
@@ -337,7 +371,14 @@ def piecewise_linear(r1, s1, r2, s2):
  
 # Prompt User for threshold value so that any value below that value
 # is taken to 0 and any value at least the threshold is taken to max
+# Prompt User for threshold value so that any value below that value
+# is taken to 0 and any value at least the threshold is taken to max
 def prompt_threshold(event):
+    global image
+
+    if not is_image():
+        return
+
     while(True):
         thresh = simpledialog.askinteger("Input", "Enter an integer threshold value from [0,255]", 
                                     parent=root, 
@@ -352,11 +393,10 @@ def prompt_threshold(event):
         if thresh != None:
             break
                                          
-    threshold(thresh, newmax)
+    threshold(thresh, newmax, image)
     
-def threshold(tvalue, maxvalue):
-    global image
-    
+def threshold(tvalue, maxvalue, image):
+
     thresh_img = image.copy()
     
     thresh_img[thresh_img < tvalue] = 0
@@ -364,9 +404,14 @@ def threshold(tvalue, maxvalue):
     
     thresh_img = np.array(thresh_img, dtype = np.uint8)
     update_new(thresh_img)
+    return thresh_img
 
 
 def prompt_gamma(event):
+    
+    if not is_image():
+        return
+
     while (True):
             gvalue = simpledialog.askfloat("Input", "Enter in a value for gamma at least 0",
                                              parent=root,
@@ -475,10 +520,48 @@ def prompt_set(event):
     options[op.lower()]()
     
 
+def bitwise_and(event):
+    #Requires two images
+    if not second_img:
+        showinfo("Error", "Need Two Images")
+        return
+    
+    thresh_img1 = threshold(127, 255, img1_subset)
+    thresh_img2 = threshold(127, 255, img2_subset)
+    and_img = cv2.bitwise_and(thresh_img1, thresh_img2)
+    update_new(and_img)
 
-def display_img1_subset(event):
-    global img1_subset
-    update_new(img1_subset)
+def bitwise_or(event):
+     #Requires two images
+    if not second_img:
+        showinfo("Error", "Need Two Images")
+        return
+    
+    thresh_img1 = threshold(127, 255, img1_subset)
+    thresh_img2 = threshold(127, 255, img2_subset)
+    or_img = cv2.bitwise_or(thresh_img1, thresh_img2)
+    update_new(or_img)
+
+def bitwise_xor(event):
+     #Requires two images
+    if not second_img:
+        showinfo("Error", "Need Two Images")
+        return
+    
+    thresh_img1 = threshold(127, 255, img1_subset)
+    thresh_img2 = threshold(127, 255, img2_subset)
+    xor_img = cv2.bitwise_xor(thresh_img1, thresh_img2)
+    update_new(xor_img)
+
+def bitwise_not(event):
+     #Requires two images
+    if not second_img:
+        showinfo("Error", "No Image")
+        return
+    
+    thresh_img = threshold(127, 255, image)
+    not_img = cv2.bitwise_not(thresh_img)
+    update_new(not_img)
   
 ##---------------------------------------------------------------------------##
 def main():
@@ -595,13 +678,33 @@ def main():
     btn_gamma.grid(row = 6, column = 0)
     btn_gamma.bind('<ButtonRelease-1>', prompt_gamma)
 
-    btn_display_img1_subset = Button(
+    btn_bitwise_and = Button(
         master=frame,
-        text="Image 1 Subset"
+        text="AND",
     )
-    btn_display_img1_subset.grid(row=7, column=0)
-    btn_display_img1_subset.bind('<ButtonRelease-1>', display_img1_subset)
-    
+    btn_bitwise_and.grid(row=7, column=0)
+    btn_bitwise_and.bind('<ButtonRelease-1>', bitwise_and)
+
+    btn_bitwise_or = Button(
+        master=frame,
+        text="OR",
+    )
+    btn_bitwise_or.grid(row=7, column=1)
+    btn_bitwise_or.bind('<ButtonRelease-1>', bitwise_or)
+
+    btn_bitwise_xor = Button(
+        master=frame,
+        text="XOR",
+    )
+    btn_bitwise_xor.grid(row=7, column=2)
+    btn_bitwise_xor.bind('<ButtonRelease-1>', bitwise_xor)
+
+    btn_bitwise_not = Button(
+        master=frame,
+        text="NOT",
+    )
+    btn_bitwise_not.grid(row=7, column=3)
+    btn_bitwise_not.bind('<ButtonRelease-1>', bitwise_not)
  
     btn_bin = Button(
         master=frame,

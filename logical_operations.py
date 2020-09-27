@@ -76,7 +76,7 @@ def select_img1(event):
     # if there is a path and it is readable
     if len(path) > 0 and cv2.haveImageReader(path):
         update_img1(path)
-        img = False
+        img = True
     else:
         showinfo("Error", "No Image")
 
@@ -143,7 +143,8 @@ def is_image():
     global img
     if not img:
         showinfo("Error", "No Images")
-        return
+        return False
+    return True
 
 ##---------Pixel Transformations---------------------------------------------##
 
@@ -186,10 +187,6 @@ def bitplane(color, bit):
     bitplane_img = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.uint8)
     bitplane_img[:,:,color][image[:,:,color]% 2**(bit+1) >= 2**bit] = np.uint8(255)
 
-    """for i in range(image.shape[0]):
-        for j in range(image.shape[1]):
-            if image[i][j][color] % 2**(bit+1) >= 2**bit:
-                bitplane_img[i][j][color] = 255"""
 
     update_new(bitplane_img)
 
