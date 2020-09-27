@@ -390,31 +390,15 @@ def prompt_gamma(event):
     
     
     
-def gamma_trans(gamma, multiplier):
+ddef gamma_trans(gamma, multiplier):
     global image
-    
-    #gamma_img = np.array(multiplier * 255*(image/255)**gamma, dtype = 'uint8')
-    gamma_img = np.array(multiplier * 255 * (image / 255) ** gamma)
+    gamma_img = np.array(image, dtype=np.float32)
     
     #start
     gamma_img /= 255
     gamma_img **= gamma
-    gamma_img *= 255
+    gamma_img *= (multiplier * 255)
     
-    
-    # # For integer operations
-    frac = Fraction(multiplier).limit_denominator()
-    num = frac.numerator
-    denom = frac.denominator
-    
-    # #Scaling up
-    if num >=1  and denom >= 1:
-        gamma_img[gamma_img * num >= gamma_img] *= num
-        gamma_img //= denom
-        gamma_img[gamma_img * num  < gamma_img] = 255
-        
-    else:  #scale down
-        gamma_img //= denom
     #end
     gamma_img = np.array(gamma_img, dtype = np.uint8)
     update_new(gamma_img)
