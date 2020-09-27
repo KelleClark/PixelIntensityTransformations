@@ -463,7 +463,7 @@ def prompt_set(event):
         return
     
     #Allowed operations
-    operations = ["union", "intersection", "differnece", "u", "i", "d"]
+    operations = ["union", "intersection", "difference", "u", "i", "d"]
     options = {"union" : union, "u" : union,
                "intersection" : intersection, "i" : intersection,
                "difference" : difference, "d" : difference}
