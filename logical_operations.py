@@ -110,8 +110,10 @@ def quit_img(event):
 # Save the image to the main given path appending the name of any transformation
 def save_img(event):
     name = filedialog.asksaveasfilename(confirmoverwrite=True)
-    if name == None:
+    # If no name or an invalid name is given, cancel
+    if name == None or name[0] == ".":
         return
+    #Default file type if none is given
     if "." not in name:
         name = name+".png"
     cv2.imwrite(name, new_img)
