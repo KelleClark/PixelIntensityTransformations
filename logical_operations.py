@@ -219,19 +219,21 @@ def prompt_bitplane(event):
         while(True):
             color = simpledialog.askstring("Input", "What color? (red, green, or blue)",
                                            parent=root)
-            if color != None and color.lower() in colors:
+            if color == None:
+                return 
+            # Break if acceptable, else ask again
+            elif color.lower() in colors:
                 color_code = colors.index(color.lower())
                 break
     else:
         color_code = None
     
     # Get the bit value
-    while (True):
-        bit = simpledialog.askinteger("Input", "What bit value? (0-7)",
-                                         parent=root,
-                                         minvalue=0, maxvalue=7)
-        if bit != None:
-            break
+    bit = simpledialog.askinteger("Input", "What bit value? (0-7)",
+                                     parent=root,
+                                     minvalue=0, maxvalue=7)
+    if bit == None:
+        return
     #Perform the tranformation
     bitplane(bit, color_code)
  
@@ -268,22 +270,26 @@ def prompt_arithmetic(event):
     while(True):
         op = simpledialog.askstring("Input", "What operation? (+,-,*,/)",
                                        parent=root)
-        if op != None and (op.lower() in operations):
+        # User enters nothing or cancels
+        if  op == None:
+            return
+        # Break if acceptable, else ask again
+        elif op.lower() in operations:
             break
     
     if op.lower() in [ "*", "multiply"]:
-        while (True):
-            c = simpledialog.askfloat("Input", "What C?",
-                                             parent=root)
-            if c != None:
-                break
+        c = simpledialog.askfloat("Input", "What C?", parent=root)
+        # User enters nothing or cancels
+        if c == None:
+            return
    
     else:
-        while (True):
-            c = simpledialog.askinteger("Input", "What C?",
-                                             parent=root)
-            if c != None:
-                break     
+        c = simpledialog.askinteger("Input", "What C?",
+                                         parent=root, minvalue=0)
+        # User enters nothing or cancels
+        if c == None:
+            return
+                 
     # Perform the user chosen operation
     options[op.lower()](c)
         
@@ -364,36 +370,36 @@ def prompt_plinear(event):
     if not is_image():
         return
     
-    while(True):
-        r1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter r1  from [0,254]", 
-                                    parent=root, 
-                                    minvalue=0, maxvalue=254)
-        if r1 != None:
-            break
+    r1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter r1  from (0,254]", 
+                                parent=root, 
+                                minvalue=1, maxvalue=254)
+    # User enters nothing or cancels
+    if r1 == None:
+        return
         
-    while(True):
-        s1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter s1 from [0,255]",
-                                    parent=root, minvalue=0, maxvalue=255)
-        if s1 != None:
-            break
+    s1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter s1 from [0,255]",
+                                parent=root, minvalue=0, maxvalue=255)
+    # User enters nothing or cancels
+    if s1 == None:
+        return
         
     if (int(r1) < 254):
-        while(True):
-            r2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter r2  from (" + 
-                                        str(r1+1) + " , 255]", 
-                                        parent=root, 
-                                        minvalue=(r1 + 1), maxvalue=255)
-            if r2 != None:
-                break
+        r2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter r2  from (" + 
+                                    str(r1+1) + " , 255]", 
+                                    parent=root, 
+                                    minvalue=(r1 + 1), maxvalue=255)
+        # User enters nothing or cancels
+        if r2 == None:
+            return
     else:
         r2 = 255 
-        
-    while(True):
-        s2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter s2 from (" + 
-                                    str(s1) + " , 255]", 
-                                    parent=root, minvalue=0, maxvalue=255)
-        if s2 != None:
-            break   
+
+    s2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter s2 from (" + 
+                                str(s1) + " , 255]", 
+                                parent=root, minvalue=0, maxvalue=255)
+    # User enters nothing or cancels
+    if s2 == None:
+        return   
         
     # Perform the transformation  
     piecewise_linear(r1, s1, r2, s2) 
@@ -434,19 +440,21 @@ def prompt_threshold(event):
     if not is_image():
         return
 
-    while(True):
-        thresh = simpledialog.askinteger("Input", "Enter an integer threshold value from [0,255]", 
-                                    parent=root, 
-                                    minvalue=0, maxvalue=255)
-        if thresh != None:
-            break
+    thresh = simpledialog.askinteger("Input", "Enter an integer threshold value from [0,255]", 
+                                parent=root, 
+                                minvalue=0, maxvalue=255)
     
-    while(True):
-        newmax = simpledialog.askinteger("Input", "Enter a max integer pixel value in [ " + str(thresh) + ", 255]",
-                                    parent=root, 
-                                    minvalue= thresh, maxvalue=255)
-        if thresh != None:
-            break
+    # User enters nothing or cancels
+    if thresh == None:
+        return
+    
+    newmax = simpledialog.askinteger("Input", "Enter a max integer pixel value in [ " + str(thresh) + ", 255]",
+                                parent=root, 
+                                minvalue= thresh, maxvalue=255)
+    # User enters nothing or cancels
+    if newmax == None:
+        return
+    
     # Perform the transformation                                  
     threshold(thresh, newmax, image)
     
@@ -468,19 +476,19 @@ def prompt_gamma(event):
     if not is_image():
         return
     
-    while (True):
-            gvalue = simpledialog.askfloat("Input", "Enter in a value for gamma at least 0",
-                                             parent=root,
-                                             minvalue = 0.0)
-            if gvalue != None:
-                break
-      
-    while (True):
-            cvalue = simpledialog.askfloat("Input", "Enter in a multiplier at least 0",
-                                             parent=root,
-                                             minvalue = 0.0)
-            if cvalue != None:
-                break       
+   
+    gvalue = simpledialog.askfloat("Input", "Enter in a value for gamma at least 0",
+                                     parent=root,
+                                     minvalue = 0.0)
+    if gvalue == None:
+        return
+
+   
+    cvalue = simpledialog.askfloat("Input", "Enter in a multiplier at least 0",
+                                     parent=root,
+                                     minvalue = 0.0)
+    if cvalue == None:
+        return     
      
     # Perform the transformation                                  
     gamma_trans(gvalue, cvalue)
@@ -535,12 +543,12 @@ def complement(c):
     new = image.copy()
     
     # Prompt the user for the value of C
-    while(True):
-        c= simpledialog.askinteger("Input", "What constant C?", 
-                                    parent=root, 
-                                    minvalue=0)
-        if c != None:
-            break
+    c= simpledialog.askinteger("Input", "What constant C?", 
+                                parent=root, 
+                                minvalue=0)
+    # User enters nothing or cancels
+    if c == None:
+        return
     
     new[new - c <= new] -= c
     new[new - c > new] = 0
@@ -565,9 +573,15 @@ def prompt_set(event):
     while(True):
         op = simpledialog.askstring("Input", "Union, Intersection, or Difference?",
                                        parent=root)
-        # Make sure they answer
-        if op != None and (op.lower() in operations):
+        
+        # User enters nothing or cancels
+        if  op == None:
+            return
+        
+        # Break if acceptable, else ask again
+        elif op.lower() in operations:
             break
+        
     # Call the user chosen operation
     options[op.lower()]()
 
