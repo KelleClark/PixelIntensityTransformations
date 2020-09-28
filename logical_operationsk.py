@@ -442,9 +442,9 @@ def piecewise_linear(r1, s1, r2, s2):
     # pixel values greater than or equal to r2 are acted on by
     # the linear transformation (255 - s2)/(255 - r2)
     
-    plinear_img[plinear_img < r1] *= s1//r1
-    plinear_img[plinear_img >= r2] *= (255 - s2)//(255 - r2)
-    plinear_img[(plinear_img >= r1) <r2 ] *=  (s2 - s1)//(r2 - r1)
+    plinear_img[plinear_img < r1] *= np.uint8(s1//r1)
+    plinear_img[plinear_img >= r2] *= np.uint8((255 - s2)//(255 - r2))
+    plinear_img[(plinear_img >= r1) <r2 ] *=  np.uint8((s2 - s1)//(r2 - r1))
     
     plinear_img = np.array(plinear_img, dtype = np.uint8)
     
