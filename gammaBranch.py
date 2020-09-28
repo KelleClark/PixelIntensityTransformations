@@ -358,9 +358,7 @@ def prompt_gamma(event):
                                          
     gamma_trans(gvalue, cvalue)
     
-    
-    
-    
+        
 def gamma_trans(gamma, multiplier):
     global image
     
@@ -387,8 +385,41 @@ def gamma_trans(gamma, multiplier):
         
     gamma_img = np.array(gamma_img, dtype = np.uint8)
     update_new(gamma_img)
+    
+def prompt_logic_op(event):
+    
+    operations = ["add", "subtract", "multiply", "divide"]
+    short = ["+", "-", "*", "/"]
+    
+    options = {"+" : add_c, "add" : add_c,
+               "-" : minus_c, "subtract" : minus_c,
+               "*" : times_c, "multiply" : times_c,
+               "/" : divide_c, "divide": divide_c,}
+    
+    
+    while(True):
+        op = simpledialog.askstring("Input", "What operation? (+,-,*,/)",
+                                       parent=root)
+        if op != None and (op.lower() in operations or op in short):
+            break
+    if op.lower() in [ "*", "multiply"]:
+        while (True):
+            c = simpledialog.askfloat("Input", "What C?",
+                                             parent=root)
+            if c != None:
+                break
    
-  
+    else:
+        while (True):
+            c = simpledialog.askinteger("Input", "What C?",
+                                             parent=root)
+            if c != None:
+                break     
+
+    options[op.lower()](c)
+   
+def logic_operations(second_img, operator):
+    
 ##---------------------------------------------------------------------------##
 def main():
     global root, original, new

@@ -187,21 +187,22 @@ def log_trans(event):
 def prompt_plinear(event):
     
     while(True):
-        r1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter r1  from [0,254]", 
+        r1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter an integer r1  from [1,254]", 
                                     parent=root, 
-                                    minvalue=0, maxvalue=254)
+                                    minvalue=1, maxvalue=254)
         if r1 != None:
             break
         
     while(True):
-        s1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter s1 from [0,255]",
-                                    parent=root, minvalue=0, maxvalue=255)
+        s1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter an integer s1 from [0,255]",
+                                    parent=root,
+                                    minvalue=0, maxvalue=255)
         if s1 != None:
             break
         
     if (int(r1) < 254):
         while(True):
-            r2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter r2  from (" + 
+            r2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter a integer r2  from (" + 
                                         str(r1+1) + " , 255]", 
                                         parent=root, 
                                         minvalue=(r1 + 1), maxvalue=255)
@@ -211,7 +212,7 @@ def prompt_plinear(event):
         r2 = 255 
         
     while(True):
-        s2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter s2 from (" + 
+        s2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter an integer s2 from (" + 
                                     str(s1) + " , 255]", 
                                     parent=root, minvalue=0, maxvalue=255)
         if s2 != None:
