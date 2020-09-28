@@ -29,7 +29,7 @@ img2_gray = True
 #To reload image 2 in the event of a type mismatch
 img2_path = ""
 
-##-------Functions to open/read an image file and rendering in UI------------##
+##-------Functions to open/read an image file and render in UI------------##
 
 # Read in image referred to by path and conform to fit screen
 def opencv_img(path):
@@ -74,7 +74,7 @@ def convert_img(image):
 def select_img1(event):
     global img, second_img
     # Prompt the user
-    path = filedialog.askopenfilename()
+    path = filedialog.askopenfilename(title="Please Select First Image")
     # if there is a path and it is readable
     if len(path) > 0 and cv2.haveImageReader(path):
         color_img()
@@ -84,23 +84,23 @@ def select_img1(event):
             correct_mismatch()
             get_subsets()
     else:
-        showinfo("Error", "No Image")
+        showinfo("Error", "No Image was found at path or it is not readable.")
 
 def select_img2(event):
     global second_img
     
     if img == False:
-        showinfo("Error", "Load Image 1 First")
+        showinfo("Error", "Pleae Load Image 1 First")
         return
     # Prompt the user
-    path = filedialog.askopenfilename()
+    path = filedialog.askopenfilename(title="Please Select Second Image")
     # if there is a path and it is readable
     if len(path) > 0 and cv2.haveImageReader(path):
         update_img2(path)
         get_subsets()
         second_img = True
     else:
-        showinfo("Error", "No Image")
+        showinfo("Error", "No image was found at path or it is not readable.")
 
 #Exit the program
 def quit_img(event):
@@ -161,11 +161,11 @@ def update_img2(path):
         image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
     #Convert and display
     disp_img = convert_img(image2)
-    img2.configure(image=disp_img)
+    img2.configure(image=disp_img, title="Image2")
     img2.image = disp_img
     return disp_img
 
-# Cut either image to match the size of the smaller image
+# Cut either (one or both) image to match the size of the smallest dimensions of the images
 def get_subsets():
     global image, image2, img1_subset, img2_subset
     img1_subset = image[0:int(min(image.shape[0], image2.shape[0])),
@@ -187,7 +187,7 @@ def update_new(img):
 def is_image():
     global img
     if not img:
-        showinfo("Error", "No Images")
+        showinfo("Error", "First Image has not been selected. Please select image 1.")
         return False
     return True
 
@@ -219,21 +219,19 @@ def prompt_bitplane(event):
         while(True):
             color = simpledialog.askstring("Input", "What color? (red, green, or blue)",
                                            parent=root)
-            if color == None:
-                return 
-            # Break if acceptable, else ask again
-            elif color.lower() in colors:
+            if color != None and color.lower() in colors:
                 color_code = colors.index(color.lower())
                 break
     else:
         color_code = None
     
     # Get the bit value
-    bit = simpledialog.askinteger("Input", "What bit value? (0-7)",
-                                     parent=root,
-                                     minvalue=0, maxvalue=7)
-    if bit == None:
-        return
+    while (True):
+        bit = simpledialog.askinteger("Input", "What bit value? (0-7)",
+                                         parent=root,
+                                         minvalue=0, maxvalue=7)
+        if bit != None:
+            break
     #Perform the tranformation
     bitplane(bit, color_code)
  
@@ -270,26 +268,22 @@ def prompt_arithmetic(event):
     while(True):
         op = simpledialog.askstring("Input", "What operation? (+,-,*,/)",
                                        parent=root)
-        # User enters nothing or cancels
-        if  op == None:
-            return
-        # Break if acceptable, else ask again
-        elif op.lower() in operations:
+        if op != None and (op.lower() in operations):
             break
     
     if op.lower() in [ "*", "multiply"]:
-        c = simpledialog.askfloat("Input", "What C?", parent=root)
-        # User enters nothing or cancels
-        if c == None:
-            return
+        while (True):
+            c = simpledialog.askfloat("Input", "What C?",
+                                             parent=root)
+            if c != None:
+                break
    
     else:
-        c = simpledialog.askinteger("Input", "What C?",
-                                         parent=root, minvalue=0)
-        # User enters nothing or cancels
-        if c == None:
-            return
-                 
+        while (True):
+            c = simpledialog.askinteger("Input", "What C?",
+                                             parent=root)
+            if c != None:
+                break     
     # Perform the user chosen operation
     options[op.lower()](c)
         
@@ -370,36 +364,36 @@ def prompt_plinear(event):
     if not is_image():
         return
     
-    r1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter r1  from (0,254]", 
-                                parent=root, 
-                                minvalue=1, maxvalue=254)
-    # User enters nothing or cancels
-    if r1 == None:
-        return
+    while(True):
+        r1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter an integer value r1  from [1, 254]", 
+                                    parent=root, 
+                                    minvalue=1, maxvalue=254)
+        if r1 != None:
+            break
         
-    s1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter s1 from [0,255]",
-                                parent=root, minvalue=0, maxvalue=255)
-    # User enters nothing or cancels
-    if s1 == None:
-        return
+    while(True):
+        s1 = simpledialog.askinteger("Input", "For the point (r1, s1), enter an integer value s1 from [0,255]",
+                                    parent=root, minvalue=0, maxvalue=255)
+        if s1 != None:
+            break
         
     if (int(r1) < 254):
-        r2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter r2  from (" + 
-                                    str(r1+1) + " , 255]", 
-                                    parent=root, 
-                                    minvalue=(r1 + 1), maxvalue=255)
-        # User enters nothing or cancels
-        if r2 == None:
-            return
+        while(True):
+            r2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter an integer value r2  from (" + 
+                                        str(r1+1) + " , 255]", 
+                                        parent=root, 
+                                        minvalue=(r1 + 1), maxvalue=255)
+            if r2 != None:
+                break
     else:
         r2 = 255 
-
-    s2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter s2 from (" + 
-                                str(s1) + " , 255]", 
-                                parent=root, minvalue=0, maxvalue=255)
-    # User enters nothing or cancels
-    if s2 == None:
-        return   
+        
+    while(True):
+        s2 = simpledialog.askinteger("Input", "For the point (r2, s2), enter an integer value s2 from (" + 
+                                    str(s1) + " , 255]", 
+                                    parent=root, minvalue=0, maxvalue=255)
+        if s2 != None:
+            break   
         
     # Perform the transformation  
     piecewise_linear(r1, s1, r2, s2) 
@@ -423,9 +417,9 @@ def piecewise_linear(r1, s1, r2, s2):
     # pixel values greater than or equal to r2 are acted on by
     # the linear transformation (255 - s2)/(255 - r2)
     
-    plinear_img[plinear_img < r1] *= s1//r1
-    plinear_img[plinear_img >= r2] *= (255 - s2)//(255 - r2)
-    plinear_img[(plinear_img >= r1) <r2 ] *=  (s2 - s1)//(r2 - r1)
+    plinear_img[plinear_img < r1] *= np.uint8(s1//r1)
+    plinear_img[plinear_img >= r2] *= np.uint8((255 - s2)//(255 - r2))
+    plinear_img[(plinear_img >= r1) <r2 ] *=  np.uint8((s2 - s1)//(r2 - r1))
     
     plinear_img = np.array(plinear_img, dtype = np.uint8)
      #Update the transformation window
@@ -440,21 +434,19 @@ def prompt_threshold(event):
     if not is_image():
         return
 
-    thresh = simpledialog.askinteger("Input", "Enter an integer threshold value from [0,255]", 
-                                parent=root, 
-                                minvalue=0, maxvalue=255)
+    while(True):
+        thresh = simpledialog.askinteger("Input", "Enter an integer threshold value from [0,255]. All pixel values at least this threshold will be taken to max value.", 
+                                    parent=root, 
+                                    minvalue=0, maxvalue=255)
+        if thresh != None:
+            break
     
-    # User enters nothing or cancels
-    if thresh == None:
-        return
-    
-    newmax = simpledialog.askinteger("Input", "Enter a max integer pixel value in [ " + str(thresh) + ", 255]",
-                                parent=root, 
-                                minvalue= thresh, maxvalue=255)
-    # User enters nothing or cancels
-    if newmax == None:
-        return
-    
+    while(True):
+        newmax = simpledialog.askinteger("Input", "Please enter the max integer pixel value in the interval [ " + str(thresh) + ", 255]",
+                                    parent=root, 
+                                    minvalue= thresh, maxvalue=255)
+        if thresh != None:
+            break
     # Perform the transformation                                  
     threshold(thresh, newmax, image)
     
@@ -476,19 +468,19 @@ def prompt_gamma(event):
     if not is_image():
         return
     
-   
-    gvalue = simpledialog.askfloat("Input", "Enter in a value for gamma at least 0",
-                                     parent=root,
-                                     minvalue = 0.0)
-    if gvalue == None:
-        return
-
-   
-    cvalue = simpledialog.askfloat("Input", "Enter in a multiplier at least 0",
-                                     parent=root,
-                                     minvalue = 0.0)
-    if cvalue == None:
-        return     
+    while (True):
+            gvalue = simpledialog.askfloat("Input", "Output pixel will be c(pixel)^gamma. Please enter in a float value for the exponent gamma at least 0",
+                                             parent=root,
+                                             minvalue = 0.0)
+            if gvalue != None:
+                break
+      
+    while (True):
+            cvalue = simpledialog.askfloat("Input", "Output pixel will be c(pixel)^gamma. Please enter in a float multiplier c at least 0",
+                                             parent=root,
+                                             minvalue = 0.0)
+            if cvalue != None:
+                break       
      
     # Perform the transformation                                  
     gamma_trans(gvalue, cvalue)
@@ -509,6 +501,29 @@ def gamma_trans(gamma, multiplier):
      #Update the transformation window
     update_new(gamma_img)
 
+#Prompt the user for what binary set operation they want.    
+def prompt_set(event):
+    
+    #Requires two images
+    if not second_img:
+        showinfo("Error", "Set operations require two images. Please select a second image and then try again.")
+        return
+    
+    #Allowed set operations
+    operations = ["union", "intersection", "difference", "u", "i", "d"]
+    options = {"union" : union, "u" : union,
+               "intersection" : intersection, "i" : intersection,
+               "difference" : difference, "d" : difference}
+    
+    # Propmt the user for an operation
+    while(True):
+        op = simpledialog.askstring("Input", "Please enter:  union, intersection, or difference?",
+                                       parent=root)
+        # Make sure they answer
+        if op != None and (op.lower() in operations):
+            break
+    # Call the user chosen operation
+    options[op.lower()]()
 
 # Union of the current two images   
 def union():
@@ -531,8 +546,36 @@ def difference():
     new[new == img2_subset] = 0 
      #Update the transformation window
     update_new(new)
+
+
+#Prompt the user for what binary set operation they want.    
+def prompt_logical(event):
     
-# The complement of the current image using C
+    #Allowed set operations
+    operations = ["and", "or", "xor", "compliment", "a", "o", "x", "c"]
+    options = {"and": bitwise_and, "a" : bitwise_and,
+               "or" : bitwise_or, "o" : bitwise_or,
+               "xor" : bitwise_xor, "x" : bitwise_xor,
+               "compliment": complement, "c": complement}
+    
+    # Propmt the user for an operation
+    while(True):
+        op = simpledialog.askstring("Input",
+                                    "For logical bitwise operations, please enter: and, or, xor, compliment",
+                                     parent=root)
+        # Make sure they answer
+        if op != None and (op.lower() in operations):
+            break
+        if (op.lower() != "c") or (op.lower() != "compliment") and (op.lower() in operations):
+             #Requires two images
+             if not second_img:
+                 showinfo("Error", "Logical operations, other than compliment, require two images. Please select a second image and then try again.")
+                 return
+    
+    # Call the user chosen operation
+    options[op.lower()]()  
+    
+# The complement of the current image using c
 def complement(c):
     global image    
     
@@ -543,47 +586,19 @@ def complement(c):
     new = image.copy()
     
     # Prompt the user for the value of C
-    c= simpledialog.askinteger("Input", "What constant C?", 
-                                parent=root, 
-                                minvalue=0)
-    # User enters nothing or cancels
-    if c == None:
-        return
+    while(True):
+        c= simpledialog.askinteger("Input", "What constant C?", 
+                                    parent=root, 
+                                    minvalue=0)
+        if c != None:
+            break
     
     new[new - c <= new] -= c
     new[new - c > new] = 0
      #Update the transformation window
     update_new(new)
 
-#Prompt the user for what binary set operation they want.    
-def prompt_set(event):
-    
-    #Requires two images
-    if not second_img:
-        showinfo("Error", "Need Two Images")
-        return
-    
-    #Allowed operations
-    operations = ["union", "intersection", "difference", "u", "i", "d"]
-    options = {"union" : union, "u" : union,
-               "intersection" : intersection, "i" : intersection,
-               "difference" : difference, "d" : difference}
-    
-    # Propmt the user for an operation
-    while(True):
-        op = simpledialog.askstring("Input", "Union, Intersection, or Difference?",
-                                       parent=root)
-        
-        # User enters nothing or cancels
-        if  op == None:
-            return
-        
-        # Break if acceptable, else ask again
-        elif op.lower() in operations:
-            break
-        
-    # Call the user chosen operation
-    options[op.lower()]()
+
 
 def bitwise_and(event):
     #Requires two images
