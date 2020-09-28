@@ -7,7 +7,7 @@ This is a temporary script file.
 from tkinter import Tk, filedialog, Frame, Label, Button, simpledialog, filedialog
 from PIL import Image, ImageTk
 from time import time
-from tkinter.messagebox import showinfo
+from tkinter.messagebox import showinfo, askyesno
 import argparse
 import cv2
 import filetype
@@ -22,6 +22,12 @@ from fractions import Fraction
 img = False
 second_img = False
 
+#Flags for determining if the image is grayscal (default is true)
+img_gray = True
+img2_gray = True
+
+#To reload image 2 in the event of a type mismatch
+img2_path = ""
 
 ##-------Functions to open/read an image file and rendering in UI------------##
 
@@ -29,7 +35,6 @@ second_img = False
 def opencv_img(path):
     # read and convert image
     image = cv2.imread(path)
-    img = cv2.resize(image, (0,0), fx=0.5, fy=0.5) 
     defaultrows = 420
     defaultcolumn = 580
     # Set scale multiplier to the lowest of the following values:
@@ -63,25 +68,30 @@ def convert_img(image):
     return(imgtk)
 
 
-
-
-
 ##----------User Controls for the UI-----------------------------------------##
 
 # Select the image to load
 def select_img1(event):
-    global img
+    global img, second_img
     # Prompt the user
     path = filedialog.askopenfilename()
     # if there is a path and it is readable
     if len(path) > 0 and cv2.haveImageReader(path):
+        color_img()
         update_img1(path)
         img = True
+        if second_img:
+            correct_mismatch()
+            get_subsets()
     else:
         showinfo("Error", "No Image")
 
 def select_img2(event):
     global second_img
+    
+    if img == False:
+        showinfo("Error", "Load Image 1 First")
+        return
     # Prompt the user
     path = filedialog.askopenfilename()
     # if there is a path and it is readable
@@ -100,28 +110,60 @@ def quit_img(event):
 # Save the image to the main given path appending the name of any transformation
 def save_img(event):
     name = filedialog.asksaveasfilename(confirmoverwrite=True)
+    if name == None:
+        return
+    if "." not in name:
+        name = name+".png"
     cv2.imwrite(name, new_img)
 
+#Determine if the image should be color or grayscale
+def color_img():
+    global img_gray, img2_gray
+    answer = askyesno("Question","Default is Grayscale image. Do you want to use a Color Image?")
+    if answer:
+        img_gray = False
+        img2_gray = False
+    else: 
+        img_gray = True
+        img2_gray = True
 
+#If image 1 is changed to grayscale or color, convert image 2 to match image 1  
+def correct_mismatch():
+    global img2_path
+    showinfo("Updating", "Updating Image 2 to match Image 1 format")
+    update_img2(img2_path)
+        
 
 ##---------GUI update image formating ---------------------------------------##
 # User given path to image, open and format image return disp_img        
 def update_img1(path):
     global img1, image
+    #Load the image
     image = opencv_img(path)
+    #Convert to grayscale if requested
+    if img_gray:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    #Convert and display
     disp_img = convert_img(image) 
     img1.configure(image=disp_img)
     img1.image = disp_img
     return disp_img
 
 def update_img2(path):
-    global img2, image2
+    global img2, image2, img2_path
+    #Load the image
+    img2_path = path
     image2 = opencv_img(path)
+    #Convert to grayscale if requested
+    if img2_gray: 
+        image2 = cv2.cvtColor(image2, cv2.COLOR_BGR2GRAY)
+    #Convert and display
     disp_img = convert_img(image2)
     img2.configure(image=disp_img)
     img2.image = disp_img
     return disp_img
 
+# Cut either image to match the size of the smaller image
 def get_subsets():
     global image, image2, img1_subset, img2_subset
     img1_subset = image[0:int(min(image.shape[0], image2.shape[0])),
@@ -138,7 +180,8 @@ def update_new(img):
     disp_img = convert_img(img)
     new.configure(image=disp_img)
     new.image = disp_img
-    
+  
+# Check if the first image is loaded
 def is_image():
     global img
     if not img:
@@ -152,62 +195,78 @@ def is_image():
 # Negative Transformation of image
 def neg_img(event):
     global image
+    # Check there is an image
     if not is_image():
         return
     neg_img = 255-image
+    #Update the transformation window
     update_new(neg_img)
 
 # Bitplane Prompt for user
 def prompt_bitplane(event):
+    
+    #Check an image is loaded
     if not is_image():
         return
+    
     colors = ["blue", "green", "red"]
-    while(True):
-        color = simpledialog.askstring("Input", "What color? (red, green, or blue)",
-                                       parent=root)
-        if color != None and color.lower() in colors:
-            color_code = colors.index(color.lower())
-            break
-
+    
+    #Is the image color?
+    if img_gray == False:
+        # Get the color to use
+        while(True):
+            color = simpledialog.askstring("Input", "What color? (red, green, or blue)",
+                                           parent=root)
+            if color != None and color.lower() in colors:
+                color_code = colors.index(color.lower())
+                break
+    
+    # Get the bit value
     while (True):
         bit = simpledialog.askinteger("Input", "What bit value? (0-7)",
                                          parent=root,
                                          minvalue=0, maxvalue=7)
         if bit != None:
             break
-
-    bitplane(color_code, bit)
+    #Perform the tranformation
+    bitplane(bit, color_code)
  
 # Bitplane Transformaton of image    
-def bitplane(color, bit):
+def bitplane(bit, color=None):
     global image
-    if not is_image():
-        return
-    # Faster numpy trick
-    bitplane_img = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.uint8)
-    bitplane_img[:,:,color][image[:,:,color]% 2**(bit+1) >= 2**bit] = np.uint8(255)
+    if img_gray:
+        #Bitplane for color
+        bitplane_img = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.uint8)
+        bitplane_img[:,:,color][image[:,:,color]% 2**(bit+1) >= 2**bit] = np.uint8(255)
+    else:
+        # For grayscale
+        bitplane_img = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.uint8)
+        bitplane_img[:,:,color][image[:,:,color]% 2**(bit+1) >= 2**bit] = np.uint8(255)
 
-
+     #Update the transformation window
     update_new(bitplane_img)
 
 # Prompt user for Arithmetic Operations
 def prompt_arithmetic(event):
+    #Check an image is loaded
     if not is_image():
         return
-    operations = ["add", "subtract", "multiply", "divide"]
-    short = ["+", "-", "*", "/"]
+    
+    # List of allowed operations
+    operations = ["add", "subtract", "multiply", "divide", "+", "-", "*", "/"]
     
     options = {"+" : add_c, "add" : add_c,
                "-" : minus_c, "subtract" : minus_c,
                "*" : times_c, "multiply" : times_c,
                "/" : divide_c, "divide": divide_c,}
     
-    
+    # Prompt the user for an operation
     while(True):
         op = simpledialog.askstring("Input", "What operation? (+,-,*,/)",
                                        parent=root)
-        if op != None and (op.lower() in operations or op in short):
+        if op != None and (op.lower() in operations):
             break
+    
     if op.lower() in [ "*", "multiply"]:
         while (True):
             c = simpledialog.askfloat("Input", "What C?",
@@ -221,7 +280,7 @@ def prompt_arithmetic(event):
                                              parent=root)
             if c != None:
                 break     
-
+    # Perform the user chosen operation
     options[op.lower()](c)
         
     
@@ -231,6 +290,7 @@ def add_c(c):
     new_image = image.copy()
     new_image[new_image + c >= new_image] += c
     new_image[new_image + c < new_image] = 255
+    #Update the transformation window
     update_new(new_image)
     
 # Arithmetic Subtract c from each pixel in the image    
@@ -239,6 +299,7 @@ def minus_c(c):
     new_image = image.copy()
     new_image[new_image - c <= new_image] -= c
     new_image[new_image - c > new_image] = 0
+    #Update the transformation window
     update_new(new_image)
     
 # Arithmetic Multilply each pixel in the image by c
@@ -258,7 +319,7 @@ def times_c(c):
         
     else:  #scale down
         new_image //= divide
-        
+    #Update the transformation window
     update_new(new_image)
  
 # Arithmetic Divide each pixel by c       
@@ -266,12 +327,15 @@ def divide_c(c):
     global image
     new_image = image.copy()
     new_image //= c
+    #Update the transformation window
     update_new(new_image)
     
 
 # Logarithmic Transformation of image    
 def log_trans(event):
     global image
+    
+    #Check an image is loaded
     if not is_image():
         return
     
@@ -279,21 +343,20 @@ def log_trans(event):
     
     # Add 1 to all pixel values except those at 255 to prevent overflow
     cpy_img[cpy_img<255] += 1
-    maximum = np.max(cpy_img)
-   
-    #Prevent divide by 0 due to overflow
-    if maximum != 255:
-        maximum = maximum + 1
+    log = np.log(cpy_img)
    
     #Log transformation
-    log_img = (255/math.log(maximum)) * np.log(cpy_img)
-    
+    log_img = (255/np.max(log)) * log
     log_img = np.array(log_img, dtype = np.uint8)
+    
+    #Update the transformation window
     update_new(log_img)
+    
 
 # Prompt user for Piecewise Linear transformation points
 def prompt_plinear(event):
     
+    #Check an image is loaded
     if not is_image():
         return
     
@@ -328,7 +391,7 @@ def prompt_plinear(event):
         if s2 != None:
             break   
         
-        
+    # Perform the transformation  
     piecewise_linear(r1, s1, r2, s2) 
     
 # Piecewise Linear Transformation of image   
@@ -355,13 +418,15 @@ def piecewise_linear(r1, s1, r2, s2):
     plinear_img[(plinear_img >= r1) <r2 ] *=  (s2 - s1)//(r2 - r1)
     
     plinear_img = np.array(plinear_img, dtype = np.uint8)
+     #Update the transformation window
     update_new(plinear_img)
  
 # Prompt User for threshold value so that any value below that value
 # is taken to 0 and any value at least the threshold is taken to max
 def prompt_threshold(event):
     global image
-
+    
+    #Check an image is loaded
     if not is_image():
         return
 
@@ -378,7 +443,7 @@ def prompt_threshold(event):
                                     minvalue= thresh, maxvalue=255)
         if thresh != None:
             break
-                                         
+    # Perform the transformation                                  
     threshold(thresh, newmax, image)
     
 def threshold(tvalue, maxvalue, image):
@@ -389,11 +454,13 @@ def threshold(tvalue, maxvalue, image):
     thresh_img[thresh_img >= tvalue] = maxvalue
     
     thresh_img = np.array(thresh_img, dtype = np.uint8)
+     #Update the transformation window
     update_new(thresh_img)
     return thresh_img
 
 def prompt_gamma(event):
-
+    
+    #Check an image is loaded
     if not is_image():
         return
     
@@ -411,7 +478,7 @@ def prompt_gamma(event):
             if cvalue != None:
                 break       
      
-                                         
+    # Perform the transformation                                  
     gamma_trans(gvalue, cvalue)
     
     
@@ -427,6 +494,7 @@ def gamma_trans(gamma, multiplier):
     
     #end
     gamma_img = np.array(gamma_img, dtype = np.uint8)
+     #Update the transformation window
     update_new(gamma_img)
 
 
@@ -434,12 +502,14 @@ def gamma_trans(gamma, multiplier):
 def union():
     global img1_subset, img2_subset
     new = np.maximum(img1_subset, img2_subset)
+     #Update the transformation window
     update_new(new)
 
 # Intersection of the current two images  
 def intersection():
     global image, image2
     new = np.minimum(img1_subset, img2_subset)
+     #Update the transformation window
     update_new(new)
 
 # Set difference of the current two images
@@ -447,17 +517,22 @@ def difference():
     global img1_subset, img2_subset
     new = img1_subset.copy()
     new[new == img2_subset] = 0 
+     #Update the transformation window
     update_new(new)
     
 # The complement of the current image using C
 def complement(c):
     global image    
+    
+    #Check an image is loaded
     if not is_image():
         return
+    
     new = image.copy()
-
+    
+    # Prompt the user for the value of C
     while(True):
-        c= simpledialog.askinteger("Input", "What constant C?]", 
+        c= simpledialog.askinteger("Input", "What constant C?", 
                                     parent=root, 
                                     minvalue=0)
         if c != None:
@@ -465,10 +540,12 @@ def complement(c):
     
     new[new - c <= new] -= c
     new[new - c > new] = 0
+     #Update the transformation window
     update_new(new)
 
 #Prompt the user for what binary set operation they want.    
 def prompt_set(event):
+    
     #Requires two images
     if not second_img:
         showinfo("Error", "Need Two Images")
@@ -480,6 +557,7 @@ def prompt_set(event):
                "intersection" : intersection, "i" : intersection,
                "difference" : difference, "d" : difference}
     
+    # Propmt the user for an operation
     while(True):
         op = simpledialog.askstring("Input", "Union, Intersection, or Difference?",
                                        parent=root)
@@ -498,6 +576,7 @@ def bitwise_and(event):
     thresh_img1 = threshold(127, 255, img1_subset)
     thresh_img2 = threshold(127, 255, img2_subset)
     and_img = cv2.bitwise_and(thresh_img1, thresh_img2)
+     #Update the transformation window
     update_new(and_img)
 
 def bitwise_or(event):
@@ -509,6 +588,7 @@ def bitwise_or(event):
     thresh_img1 = threshold(127, 255, img1_subset)
     thresh_img2 = threshold(127, 255, img2_subset)
     or_img = cv2.bitwise_or(thresh_img1, thresh_img2)
+     #Update the transformation window
     update_new(or_img)
 
 def bitwise_xor(event):
@@ -520,16 +600,18 @@ def bitwise_xor(event):
     thresh_img1 = threshold(127, 255, img1_subset)
     thresh_img2 = threshold(127, 255, img2_subset)
     xor_img = cv2.bitwise_xor(thresh_img1, thresh_img2)
+    #Update the transformation window
     update_new(xor_img)
 
 def bitwise_not(event):
-     #Requires two images
+    #Requires two images
     if not second_img:
         showinfo("Error", "No Image")
         return
     
     thresh_img = threshold(127, 255, image)
     not_img = cv2.bitwise_not(thresh_img)
+    #Update the transformation window
     update_new(not_img)
   
 ##---------------------------------------------------------------------------##
