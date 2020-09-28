@@ -222,6 +222,8 @@ def prompt_bitplane(event):
             if color != None and color.lower() in colors:
                 color_code = colors.index(color.lower())
                 break
+    else:
+        color_code = None
     
     # Get the bit value
     while (True):
@@ -237,11 +239,11 @@ def prompt_bitplane(event):
 def bitplane(bit, color=None):
     global image
     if img_gray:
-        #Bitplane for color
-        bitplane_img = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.uint8)
-        bitplane_img[:,:,color][image[:,:,color]% 2**(bit+1) >= 2**bit] = np.uint8(255)
+        #Bitplane for grayscale
+        bitplane_img = np.zeros((image.shape[0], image.shape[1]), dtype=np.uint8)
+        bitplane_img[:, :][image[:, :] % 2 ** (bit + 1) >= 2 ** bit] = np.uint8(255)
     else:
-        # For grayscale
+        # For color
         bitplane_img = np.zeros((image.shape[0], image.shape[1], 3), dtype=np.uint8)
         bitplane_img[:,:,color][image[:,:,color]% 2**(bit+1) >= 2**bit] = np.uint8(255)
 
