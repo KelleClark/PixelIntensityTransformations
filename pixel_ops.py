@@ -28,6 +28,11 @@ img2_gray = True
 
 #To reload image 2 in the event of a type mismatch
 img2_path = ""
+##-------Launching the program-----------------------------------------------##
+# For -h argument
+def get_args():
+    parser = argparse.ArgumentParser(description='Pixel Operations v1.0/n GUI with no arguments')
+   
 
 ##-------Functions to open/read an image file and rendering in UI------------##
 
@@ -742,7 +747,9 @@ def bitwise_not():
 def main():
     global root, img1, img2, img1_subset, img2_subset, new, image, image2
 
-   
+    #Get the command arguments
+    args = get_args()
+
     root = Tk()
     root.title("Pixel Operations Application. To begin load image 1.")
     
