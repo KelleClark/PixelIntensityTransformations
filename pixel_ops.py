@@ -32,7 +32,7 @@ img2_path = ""
 # For -h argument
 def get_args():
     parser = argparse.ArgumentParser(description='Pixel Operations v1.0')
-    parser.add_argument(' ',
+    parser.add_argument('-- ', default=" ",
                         help='A Graphical User Interface with no arguments.')
     args = parser.parse_args()
     return(args)
@@ -699,60 +699,14 @@ def bitwise_not():
     #Update the transformation window
     update_new(not_img)    
 
-# def bitwise_and(event):
-#     #Requires two images
-#     if not second_img:
-#         showinfo("Error", "Need Two Images")
-#         return
-    
-#     thresh_img1 = threshold(127, 255, img1_subset)
-#     thresh_img2 = threshold(127, 255, img2_subset)
-#     and_img = cv2.bitwise_and(thresh_img1, thresh_img2)
-#      #Update the transformation window
-#     update_new(and_img)
 
-# def bitwise_or(event):
-#      #Requires two images
-#     if not second_img:
-#         showinfo("Error", "Need Two Images")
-#         return
-    
-#     thresh_img1 = threshold(127, 255, img1_subset)
-#     thresh_img2 = threshold(127, 255, img2_subset)
-#     or_img = cv2.bitwise_or(thresh_img1, thresh_img2)
-#      #Update the transformation window
-#     update_new(or_img)
-
-# def bitwise_xor(event):
-#      #Requires two images
-#     if not second_img:
-#         showinfo("Error", "Need Two Images")
-#         return
-    
-#     thresh_img1 = threshold(127, 255, img1_subset)
-#     thresh_img2 = threshold(127, 255, img2_subset)
-#     xor_img = cv2.bitwise_xor(thresh_img1, thresh_img2)
-#     #Update the transformation window
-#     update_new(xor_img)
-
-# def bitwise_not(event):
-#     #Requires two images
-#     if not second_img:
-#         showinfo("Error", "No Image")
-#         return
-    
-#     thresh_img = threshold(127, 255, image)
-#     not_img = cv2.bitwise_not(thresh_img)
-#     #Update the transformation window
-#     update_new(not_img)
-  
 ##---------------------------------------------------------------------------##
 def main():
     global root, img1, img2, img1_subset, img2_subset, new, image, image2
 
     #Get the command arguments
     args = get_args()
-    if len(args) == 1:
+    if len(sys.argv) != 1:
         print('Pixel Transformation Operations v1.0 is a GUI program without arguments')
         sys.exit(0)
         
@@ -786,6 +740,32 @@ def main():
     btn_select_img1.bind('<ButtonRelease-1>', select_img1)
 
    
+     # Button for log transformation of image
+    btn_log = Button(
+        master = frame,
+        text = "Log",
+        underline = 0
+    )
+    btn_log.grid(row = 2, column = 0)
+    btn_log.bind('<ButtonRelease-1>', log_trans)
+    
+    # button for piecewise linear
+    btn_gamma = Button(
+        master = frame,
+        text = "Gamma",
+        underline = 0
+    )
+    btn_gamma.grid(row = 2, column = 1)
+    btn_gamma.bind('<ButtonRelease-1>', prompt_gamma)
+    
+    # Button for negative of image
+    btn_neg = Button(
+        master = frame,
+        text = "Negative",
+        underline = 0
+    )
+    btn_neg.grid(row = 6, column = 1)
+    btn_neg.bind('<ButtonRelease-1>', neg_img)
     
     
     # Button for Arithmetic
@@ -803,7 +783,7 @@ def main():
         text = "Binarization/Threshold",
         underline = 13
     )
-    btn_threshold.grid(row = 8, column = 1)
+    btn_threshold.grid(row = 8, column = 0)
     btn_threshold.bind('<ButtonRelease-1>', prompt_threshold)
     
     # Button for bitplane
@@ -812,34 +792,17 @@ def main():
         text = "Bitplane",
         underline = 0
     )
-    btn_bit.grid(row = 4, column = 1)
+    btn_bit.grid(row = 4, column = 0)
     btn_bit.bind('<ButtonRelease-1>', prompt_bitplane)
     
     
-    # Button for log transformation of image
-    btn_log = Button(
-        master = frame,
-        text = "Log",
-        underline = 0
-    )
-    btn_log.grid(row = 2, column = 1)
-    btn_log.bind('<ButtonRelease-1>', log_trans)
-    
-    # Button for negative of image
-    btn_neg = Button(
-        master = frame,
-        text = "Negative",
-        underline = 0
-    )
-    btn_neg.grid(row = 2, column = 1)
-    btn_neg.bind('<ButtonRelease-1>', neg_img)
-    
+   
     btn_comp = Button(
         master=frame,
         text="Complement",
         underline = 0
     )
-    btn_comp.grid(row=6, column=1)
+    btn_comp.grid(row=4, column=1)
     btn_comp.bind('<ButtonRelease-1>', complement)
     
     
@@ -852,14 +815,7 @@ def main():
     btn_plinear.grid(row = 8, column = 1)
     btn_plinear.bind('<ButtonRelease-1>', prompt_plinear)
     
-    # button for piecewise linear
-    btn_gamma = Button(
-        master = frame,
-        text = "Gamma",
-        underline = 0
-    )
-    btn_gamma.grid(row = 4, column = 1)
-    btn_gamma.bind('<ButtonRelease-1>', prompt_gamma)
+    
 
 
     btn_select_img2 = Button(
