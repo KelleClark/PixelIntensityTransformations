@@ -31,8 +31,11 @@ img2_path = ""
 ##-------Launching the program-----------------------------------------------##
 # For -h argument
 def get_args():
-    parser = argparse.ArgumentParser(description='Pixel Operations v1.0/n GUI with no arguments')
-   
+    parser = argparse.ArgumentParser(description='Pixel Operations v1.0')
+    parser.add_argument('--dummy1',
+                        help='A Graphical User Interface with no arguments.')
+    parser.add_argument('--dummy2',
+                        help= 'Images and operations are user selected.')
 
 ##-------Functions to open/read an image file and rendering in UI------------##
 
