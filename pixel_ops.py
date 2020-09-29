@@ -32,10 +32,10 @@ img2_path = ""
 # For -h argument
 def get_args():
     parser = argparse.ArgumentParser(description='Pixel Operations v1.0')
-    parser.add_argument('--dummy1',
+    parser.add_argument(' ',
                         help='A Graphical User Interface with no arguments.')
-    parser.add_argument('--dummy2',
-                        help= 'Images and operations are user selected.')
+    args = parser.parse_args()
+    return(args)
 
 ##-------Functions to open/read an image file and rendering in UI------------##
 
@@ -752,7 +752,10 @@ def main():
 
     #Get the command arguments
     args = get_args()
-
+    if len(args) == 1:
+        print('Pixel Transformation Operations v1.0 is a GUI program without arguments')
+        sys.exit(0)
+        
     root = Tk()
     root.title("Pixel Operations Application. To begin load image 1.")
     
@@ -779,7 +782,7 @@ def main():
         text = "          Select image 1          ",
         underline = 23
     )
-    btn_select_img1.grid(row = 0, column = 1)
+    btn_select_img1.grid(row = 0, column = 0)
     btn_select_img1.bind('<ButtonRelease-1>', select_img1)
 
    
@@ -800,7 +803,7 @@ def main():
         text = "Binarization/Threshold",
         underline = 13
     )
-    btn_threshold.grid(row = 8, column = 2)
+    btn_threshold.grid(row = 8, column = 1)
     btn_threshold.bind('<ButtonRelease-1>', prompt_threshold)
     
     # Button for bitplane
@@ -809,7 +812,7 @@ def main():
         text = "Bitplane",
         underline = 0
     )
-    btn_bit.grid(row = 4, column = 0)
+    btn_bit.grid(row = 4, column = 1)
     btn_bit.bind('<ButtonRelease-1>', prompt_bitplane)
     
     
@@ -819,7 +822,7 @@ def main():
         text = "Log",
         underline = 0
     )
-    btn_log.grid(row = 2, column = 2)
+    btn_log.grid(row = 2, column = 1)
     btn_log.bind('<ButtonRelease-1>', log_trans)
     
     # Button for negative of image
@@ -828,7 +831,7 @@ def main():
         text = "Negative",
         underline = 0
     )
-    btn_neg.grid(row = 2, column = 0)
+    btn_neg.grid(row = 2, column = 1)
     btn_neg.bind('<ButtonRelease-1>', neg_img)
     
     btn_comp = Button(
@@ -836,7 +839,7 @@ def main():
         text="Complement",
         underline = 0
     )
-    btn_comp.grid(row=6, column=2)
+    btn_comp.grid(row=6, column=1)
     btn_comp.bind('<ButtonRelease-1>', complement)
     
     
@@ -846,7 +849,7 @@ def main():
         text = "Piecewise Linear",
         underline = 0
     )
-    btn_plinear.grid(row = 8, column = 0)
+    btn_plinear.grid(row = 8, column = 1)
     btn_plinear.bind('<ButtonRelease-1>', prompt_plinear)
     
     # button for piecewise linear
@@ -855,7 +858,7 @@ def main():
         text = "Gamma",
         underline = 0
     )
-    btn_gamma.grid(row = 4, column = 2)
+    btn_gamma.grid(row = 4, column = 1)
     btn_gamma.bind('<ButtonRelease-1>', prompt_gamma)
 
 
@@ -864,7 +867,7 @@ def main():
         text="          Select image 2          ",
         underline=23
     )
-    btn_select_img2.grid(row=14, column=1)
+    btn_select_img2.grid(row=14, column=0)
     btn_select_img2.bind('<ButtonRelease-1>', select_img2)
     
     btn_bin = Button(
@@ -878,7 +881,7 @@ def main():
         master=frame,
         text="Bitwise Logic Operations"
     )
-    btn_bin.grid(row=16, column=2)
+    btn_bin.grid(row=16, column=1)
     btn_bin.bind('<ButtonRelease-1>', prompt_logic)
     
     # btn_bitwise_and = Button(
@@ -919,7 +922,7 @@ def main():
         text = "Save",
         underline = 0
     )
-    btn_save.grid(row = 18, column = 3)
+    btn_save.grid(row = 18, column = 1)
     btn_save.bind('<ButtonRelease-1>', save_img)
     
     # Bind all the required keys to functions
