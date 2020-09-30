@@ -632,10 +632,11 @@ def prompt_logic(event):
     
     
     #Allowed logical operations
-    operations = ["and", "or", "xor", "a", "o", "x"]
+    operations = ["and", "or", "xor", "not", "a", "o", "x", "n"]
     options = {"and": bitwise_and, "a" : bitwise_and,
                "or" : bitwise_or, "o" : bitwise_or,
-               "xor" : bitwise_xor, "x" : bitwise_xor}
+               "xor" : bitwise_xor, "x" : bitwise_xor,
+               "not": bitwise_not, "n": bitwise_not}
 
     # Propmt the user for an operation
     while(True):
