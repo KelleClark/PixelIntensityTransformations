@@ -656,7 +656,7 @@ def prompt_logic(event):
 def bitwise_and():
     #Requires two images
     if not second_img:
-        showinfo("Error", "Need Two Images")
+        showinfo("Error", "Bitwise Logic Operations require two images.  Load image 2 first and try again")
         return
     
     thresh_img1 = threshold(127, 255, img1_subset)
@@ -666,9 +666,10 @@ def bitwise_and():
     update_new(and_img)
 
 def bitwise_or():
-     #Requires two images
+    
+    #Requires two images
     if not second_img:
-        showinfo("Error", "Need Two Images")
+        showinfo("Error", "Bitwise Logic Operations require two images.  Load image 2 first and try again")
         return
     
     thresh_img1 = threshold(127, 255, img1_subset)
@@ -678,10 +679,11 @@ def bitwise_or():
     update_new(or_img)
 
 def bitwise_xor():
-     #Requires two images
+    #Requires two images
     if not second_img:
-        showinfo("Error", "Need Two Images")
+        showinfo("Error", "Bitwise Logic Operations require two images.  Load image 2 first and try again")
         return
+    
     
     thresh_img1 = threshold(127, 255, img1_subset)
     thresh_img2 = threshold(127, 255, img2_subset)
