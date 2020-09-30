@@ -625,11 +625,6 @@ def prompt_logic(event):
     if not is_image():
         return
     
-    #Requires two images
-    if not second_img:
-        showinfo("Error", "Bitwise Logic Operations require two images.  Load image 2 first and try again")
-        return
-    
     
     #Allowed logical operations
     operations = ["and", "or", "xor", "not", "a", "o", "x", "n"]
@@ -690,10 +685,7 @@ def bitwise_xor():
     update_new(xor_img)
 
 def bitwise_not():
-    #Requires two images
-    if not second_img:
-        showinfo("Error", "No Image")
-        return
+    
     
     thresh_img = threshold(127, 255, image)
     not_img = cv2.bitwise_not(thresh_img)
