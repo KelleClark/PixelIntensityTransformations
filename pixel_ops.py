@@ -705,13 +705,13 @@ def main():
     global root, img1, img2, img1_subset, img2_subset, new, image, image2
 
     #Get the command arguments
-    args = get_args()
+    get_args()
     if len(sys.argv) != 1:
         print('Pixel Transformation Operations v1.0 is a GUI program without arguments')
         sys.exit(0)
         
     root = Tk()
-    root.title("Pixel Operations Application. To begin load image 1.")
+    root.title("Pixel Transformations. To begin load image 1.")
     
     # The original loaded image
     img1 = Label(image=None)
@@ -733,10 +733,10 @@ def main():
     # Button for select image
     btn_select_img1 = Button(
         master = frame,
-        text = "          Select image 1          ",
-        underline = 23
+        text = "Select image 1",
+        underline = 13
     )
-    btn_select_img1.grid(row = 0, column = 0)
+    btn_select_img1.grid(row = 0, column = 1)
     btn_select_img1.bind('<ButtonRelease-1>', select_img1)
 
    
@@ -755,7 +755,7 @@ def main():
         text = "Gamma",
         underline = 0
     )
-    btn_gamma.grid(row = 2, column = 1)
+    btn_gamma.grid(row = 2, column = 2)
     btn_gamma.bind('<ButtonRelease-1>', prompt_gamma)
     
     # Button for negative of image
@@ -764,7 +764,7 @@ def main():
         text = "Negative",
         underline = 0
     )
-    btn_neg.grid(row = 6, column = 1)
+    btn_neg.grid(row = 6, column = 2)
     btn_neg.bind('<ButtonRelease-1>', neg_img)
     
     
@@ -802,7 +802,7 @@ def main():
         text="Complement",
         underline = 0
     )
-    btn_comp.grid(row=4, column=1)
+    btn_comp.grid(row=4, column=2)
     btn_comp.bind('<ButtonRelease-1>', complement)
     
     
@@ -812,7 +812,7 @@ def main():
         text = "Piecewise Linear",
         underline = 0
     )
-    btn_plinear.grid(row = 8, column = 1)
+    btn_plinear.grid(row = 8, column = 2)
     btn_plinear.bind('<ButtonRelease-1>', prompt_plinear)
     
     
@@ -820,10 +820,10 @@ def main():
 
     btn_select_img2 = Button(
         master=frame,
-        text="          Select image 2          ",
-        underline=23
+        text="Select image 2",
+        underline=13
     )
-    btn_select_img2.grid(row=14, column=0)
+    btn_select_img2.grid(row=14, column=1)
     btn_select_img2.bind('<ButtonRelease-1>', select_img2)
     
     btn_bin = Button(
@@ -837,7 +837,7 @@ def main():
         master=frame,
         text="Bitwise Logic Operations"
     )
-    btn_bin.grid(row=16, column=1)
+    btn_bin.grid(row=16, column=2)
     btn_bin.bind('<ButtonRelease-1>', prompt_logic)
     
     # btn_bitwise_and = Button(
