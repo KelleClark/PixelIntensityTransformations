@@ -606,7 +606,7 @@ def complement(event):
     new = image.copy()
     
     # Prompt the user for the value of C
-    c= simpledialog.askinteger("Input", "New pixel = pixel - c mod 255. Enter a positive integer value for the constant c.", 
+    c= simpledialog.askinteger("Input", "New pixel = min of pixel - c and 0. Enter a positive integer value for the constant c.", 
                                 parent=root, 
                                 minvalue=0)
     # User enters nothing or cancels
