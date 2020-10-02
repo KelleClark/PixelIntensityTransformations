@@ -1,0 +1,4 @@
+opencv_python_headless==4.4.0.40
+numpy==1.19.1
+filetype==1.0.7
+Pillow==7.2.0

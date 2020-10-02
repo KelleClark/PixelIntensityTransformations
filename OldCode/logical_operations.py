@@ -751,12 +751,10 @@ def main():
 
 
     root = Tk()
-<<<<<<< HEAD
-    root.title("Pixel Operations Application. To begin load image 1.")
-    
-=======
 
->>>>>>> 9fb67b54b1d73581370ed75b6320f40e8c1cf8c8
+    root.title("Pixel Operations Application. To begin load image 1.")
+
+
     # The original loaded image
     img1 = Label(image=None)
     img1.pack(side="left", padx=10, pady=10)
