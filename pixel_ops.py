@@ -663,7 +663,7 @@ def prompt_logic(event):
     # Propmt the user for an operation
     while(True):
         op = simpledialog.askstring("Input",
-                                    "For logical bitwise operations, please enter: and, or, xor",
+                                    "For logical bitwise operations, please enter: and, or, xor, not",
                                      parent=root)
         # Make sure they answer
         #if op != None and (op.lower() in operations):
@@ -677,9 +677,7 @@ def prompt_logic(event):
         elif op.lower() in operations:
             break
 
-        if not second_img and (op.lower() in operations):
-            showinfo("Error", "Logical operations require two images. Please select a second image and then try again.")
-            return
+   
 
     # Call the user chosen operation
     options[op.lower()]()
