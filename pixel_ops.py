@@ -358,14 +358,21 @@ def times_c(c):
     #Update the transformation window
     update_new(new_image)
  
-# Arithmetic Divide each pixel by c       
+
+ # Arithmetic Divide each pixel by c
 def divide_c(c):
     global image
+    # For integer operations
+    frac = Fraction(c).limit_denominator()
+    mult = frac.numerator
+    divide = frac.denominator
     new_image = image.copy()
-    new_image //= c
+
+    new_image[new_image * divide >= new_image] *= divide
+    new_image[new_image * divide  < new_image] = 255
+    new_image //= mult
     #Update the transformation window
-    update_new(new_image)
-    
+    update_new(new_image)   
 
 # Logarithmic Transformation of image    
 def log_trans(event):
