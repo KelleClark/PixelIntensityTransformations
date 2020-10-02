@@ -666,8 +666,17 @@ def prompt_logic(event):
                                     "For logical bitwise operations, please enter: and, or, xor",
                                      parent=root)
         # Make sure they answer
-        if op != None and (op.lower() in operations):
+        #if op != None and (op.lower() in operations):
+        #    break
+
+        # User enters nothing or cancels
+        if op == None:
+            return
+
+        # Break if acceptable, else ask again
+        elif op.lower() in operations:
             break
+
         if not second_img and (op.lower() in operations):
             showinfo("Error", "Logical operations require two images. Please select a second image and then try again.")
             return
